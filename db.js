@@ -1,10 +1,12 @@
 const SUPABASE_URL = 'https://cxryyztccnyhszkeetmx.supabase.co'; // Ganti pake URL lo
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4cnl5enRjY255aHN6a2VldG14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NzM5ODgsImV4cCI6MjA5MjQ0OTk4OH0.dkHgRdG9OlTyExJoHtNLrm9F3Z-4fwIGgIbEh_yQt4E'; // Ganti pake Anon Key lo
-const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Fungsi Login
+// 2. Inisialisasi Client (Pake nama 'supabase' saja biar simpel)
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+// 3. Fungsi Login
 async function handleLogin(email, password) {
-    const { data, error } = await _supabase.auth.signInWithPassword({
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password,
     });
@@ -12,18 +14,13 @@ async function handleLogin(email, password) {
     return data;
 }
 
-// Fungsi Logout
-async function handleLogout() {
-    await _supabase.auth.signOut();
-    window.location.reload();
-}
-
-// Fungsi ambil data (Otomatis sinkron karena pake Supabase)
+// 4. Fungsi Ambil Data
 async function getTransactions() {
-    const { data: { user } } = await _supabase.auth.getUser();
+    // Cek dulu user-nya ada gak
+    const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return [];
 
-    const { data, error } = await _supabase
+    const { data, error } = await supabaseClient
         .from('transaksi')
         .select('*')
         .order('tanggal', { ascending: false });
@@ -35,8 +32,7 @@ async function getTransactions() {
     return data;
 }
 
-// Export fungsi ke window biar bisa dipanggil di file HTML lain
+// 5. Tempel ke window biar bisa dipanggil di HTML
+window.supabase = supabaseClient;
 window.handleLogin = handleLogin;
-window.handleLogout = handleLogout;
 window.getTransactions = getTransactions;
-window.supabase = _supabase;

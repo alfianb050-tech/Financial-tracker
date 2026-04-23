@@ -128,9 +128,9 @@
 
                 txs.forEach(tx => {
                     const amt = parseInt(tx.amount);
-                    const [d, m, y] = tx.date.split('/');
-                    const tM = parseInt(m);
-                    const tY = parseInt(y);
+                    const parts = tx.date.split('/');
+                    const tM = parseInt(parts[1]);
+                    const tY = parseInt(parts[2]);
 
                     if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') totalIn += amt;
                     else totalOut += amt;
@@ -202,10 +202,7 @@
         }
 
         async function initApp() {
-            if (!window.supabase) {
-                console.error("Supabase Error: Pastikan db.js sudah benar.");
-                return;
-            }
+            if (!window.supabase) return;
             const { data: { user } } = await window.supabase.auth.getUser();
             if (user) {
                 document.getElementById('auth-overlay').classList.add('hidden');

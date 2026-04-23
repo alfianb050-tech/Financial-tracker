@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Transaksi | Bayu Alfianto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/db.js"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex">
+
+    <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400">
+        <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic">Bayu Alfianto</h2>
+        <nav class="space-y-8">
+            <div>
+                <p class="text-[10px] font-bold mb-4 px-3 tracking-widest uppercase text-slate-500">Utama</p>
+                <ul class="space-y-2">
+                    <li><a href="index.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📊 Dashboard</a></li>
+                    <li><a href="transaksi.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💸 Transaksi</a></li>
+                    <li><a href="aset.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💎 Manajemen Aset</a></li>
+                </ul>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold mb-4 px-3 tracking-widest uppercase text-slate-500">Laporan</p>
+                <ul class="space-y-2">
+                    <li><a href="history.html" class="block px-3 py-2 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 font-bold">📜 Riwayat Lengkap</a></li>
+                    <li><a href="bulanan.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📅 Laporan Bulanan</a></li>
+                    <li><a href="tahunan.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📈 Laporan Tahunan</a></li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-8">
+        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white uppercase italic">Financial Archive</h1>
+                <p id="display-period" class="text-xs text-slate-500 font-bold uppercase tracking-widest">Memuat...</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <select id="filter-month" onchange="renderHistory()" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-blue-500">
+                    <option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option>
+                    <option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option>
+                    <option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option>
+                    <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+                </select>
+                <select id="filter-year" onchange="renderHistory()" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-blue-500">
+                    </select>
+
+                <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700 ml-2">
+                    <button onclick="applyTypeFilter('all', this)" class="type-btn px-4 py-2 text-[9px] font-black uppercase rounded-lg bg-slate-700 text-white transition-all">ALL</button>
+                    <button onclick="applyTypeFilter('pemasukan', this)" class="type-btn px-4 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 hover:text-white transition-all">IN</button>
+                    <button onclick="applyTypeFilter('pengeluaran', this)" class="type-btn px-4 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 hover:text-white transition-all">OUT</button>
+                    <button onclick="applyTypeFilter('investasi', this)" class="type-btn px-4 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 hover:text-white transition-all">INVEST</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="bg-slate-800 rounded-[2rem] border border-slate-700 overflow-hidden shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-900/50 text-slate-500 border-b border-slate-700">
+                        <tr>
+                            <th class="p-6 text-[10px] font-bold uppercase tracking-widest">Tanggal</th>
+                            <th class="p-6 text-[10px] font-bold uppercase tracking-widest">Kategori</th>
+                            <th class="p-6 text-[10px] font-bold uppercase tracking-widest">Keterangan</th>
+                            <th class="p-6 text-[10px] font-bold uppercase tracking-widest text-right">Nominal</th>
+                            <th class="p-6 text-[10px] font-bold uppercase tracking-widest text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody" class="divide-y divide-slate-700/50">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    let currentTypeFilter = 'all';
+
+    // 1. Generate Tahun (Biar dinamis)
+    function generateYearOptions() {
+        const selectYear = document.getElementById('filter-year');
+        const currentYear = new Date().getFullYear();
+        for (let y = 2025; y <= currentYear + 3; y++) {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.text = y;
+            if (y === currentYear) opt.selected = true;
+            selectYear.appendChild(opt);
+        }
+    }
+
+    // 2. Fungsi Utama Render History dari Cloud
+    async function renderHistory() {
+        const historyBody = document.getElementById('historyBody');
+        const targetMonth = document.getElementById('filter-month').value;
+        const targetYear = document.getElementById('filter-year').value;
+        const displayPeriod = document.getElementById('display-period');
+        
+        const monthName = document.getElementById('filter-month').options[document.getElementById('filter-month').selectedIndex].text;
+        displayPeriod.innerText = `Arsip: ${monthName} ${targetYear}`;
+
+        // Loading State
+        historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-xs text-slate-500 animate-pulse uppercase tracking-widest">Menarik data dari Singapura...</td></tr>';
+
+        // AMBIL DATA DARI SUPABASE (panggil fungsi global dari db.js)
+        const transactions = await window.getTransactions(); 
+        
+        // Filter Bulan & Tahun
+        let filtered = transactions.filter(tx => {
+            const parts = tx.date.split('/');
+            const m = parts[1].padStart(2, '0'); // Pastikan 2 digit (4 -> 04)
+            const y = parts[2];
+            return m === targetMonth && y === targetYear;
+        });
+
+        // Filter Tipe
+        if (currentTypeFilter !== 'all') {
+            filtered = filtered.filter(tx => tx.type === currentTypeFilter);
+        }
+
+        // Sorting (Terbaru di atas)
+        filtered.sort((a, b) => {
+            const dateA = new Date(a.date.split('/').reverse().join('-'));
+            const dateB = new Date(b.date.split('/').reverse().join('-'));
+            return dateB - dateA;
+        });
+
+        historyBody.innerHTML = '';
+
+        if (filtered.length === 0) {
+            historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-xs text-slate-500 italic uppercase tracking-widest">Gak ada histori di periode ini, Bay.</td></tr>';
+            return;
+        }
+
+        filtered.forEach((tx) => {
+            const row = document.createElement('tr');
+            row.className = "hover:bg-slate-900/30 transition-all group";
+
+            const isNegative = tx.type === 'pengeluaran' || (tx.type === 'investasi' && tx.kategori === 'Beli Aset');
+            const colorClass = isNegative ? 'text-red-400' : 'text-green-400';
+            const simbol = isNegative ? '-' : '+';
+
+            row.innerHTML = `
+                <td class="p-6 text-xs font-mono text-slate-500">${tx.date}</td>
+                <td class="p-6">
+                    <span class="text-[9px] font-black px-3 py-1 rounded-full border border-slate-700 uppercase tracking-tighter
+                    ${tx.type === 'investasi' ? 'text-purple-400 bg-purple-500/5' : 
+                      tx.type === 'pemasukan' ? 'text-blue-400 bg-blue-500/5' : 'text-red-400 bg-red-500/5'}">
+                        ${tx.kategori}
+                    </span>
+                </td>
+                <td class="p-6">
+                    <p class="text-sm font-medium text-slate-300">${tx.keterangan}</p>
+                    <p class="text-[9px] text-slate-600 mt-1 uppercase font-bold">${tx.unitCount > 0 ? tx.unitCount + ' ' + tx.unitType : ''}</p>
+                </td>
+                <td class="p-6 text-right font-bold ${colorClass}">
+                    ${simbol} Rp ${parseInt(tx.amount).toLocaleString('id-ID')}
+                </td>
+                <td class="p-6 text-center">
+                    <button onclick="hapusData(${tx.id})" class="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-red-500 transition-all text-[10px] font-bold uppercase tracking-tighter border border-slate-800 px-3 py-1 rounded-lg">Hapus</button>
+                </td>
+            `;
+            historyBody.appendChild(row);
+        });
+    }
+
+    // 3. Fungsi Filter Tipe
+    function applyTypeFilter(type, btn) {
+        currentTypeFilter = type;
+        document.querySelectorAll('.type-btn').forEach(b => {
+            b.classList.remove('bg-slate-700', 'text-white');
+            b.classList.add('text-slate-500');
+        });
+        btn.classList.add('bg-slate-700', 'text-white');
+        renderHistory();
+    }
+
+    // 4. Fungsi Hapus Data Cloud
+    async function hapusData(id) {
+        if (confirm('Data ini bakal ilang dari Cloud selamanya, yakin Bay?')) {
+            const success = await window.deleteTransactionFromCloud(id);
+            if (success) {
+                alert("Data berhasil dimusnahkan! 🛡️");
+                renderHistory(); 
+            } else {
+                alert("Gagal hapus data. Cek koneksi!");
+            }
+        }
+    }
+
+    window.onload = () => {
+        generateYearOptions();
+        const now = new Date();
+        document.getElementById('filter-month').value = String(now.getMonth() + 1).padStart(2, '0');
+        renderHistory();
+    };
+</script>
+</body>
+</html>

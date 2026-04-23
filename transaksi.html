@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaksi | Bayu Alfianto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/db.js"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex">
+
+    <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400">
+        <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic">Bayu Alfianto</h2>
+        <nav class="space-y-8">
+            <div>
+                <p class="text-[10px] font-bold mb-4 px-3 tracking-widest uppercase text-slate-500">Utama</p>
+                <ul class="space-y-2">
+                    <li><a href="index.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📊 Dashboard</a></li>
+                    <li><a href="transaksi.html" class="block px-3 py-2 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 font-bold">💸 Transaksi</a></li>
+                    <li><a href="aset.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💎 Manajemen Aset</a></li>
+                </ul>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold mb-4 px-3 tracking-widest uppercase text-slate-500">Laporan</p>
+                <ul class="space-y-2">
+                    <li><a href="history.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📜 Riwayat Lengkap</a></li>
+                    <li><a href="bulanan.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📅 Laporan Bulanan</a></li>
+                    <li><a href="tahunan.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📈 Laporan Tahunan</a></li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-8 flex flex-col items-center justify-center">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl shadow-blue-900/10">
+            <h2 class="text-xl font-bold mb-8 text-center tracking-tight">📝 Catat Transaksi</h2>
+            
+            <form id="formTx" class="space-y-4">
+                <div class="grid grid-cols-3 gap-2 mb-6">
+                    <button type="button" id="btnIn" onclick="setTipe('pemasukan')" class="py-3 rounded-2xl border-2 font-bold text-[10px] uppercase transition-all">Masuk</button>
+                    <button type="button" id="btnOut" onclick="setTipe('pengeluaran')" class="py-3 rounded-2xl border-2 font-bold text-[10px] uppercase transition-all">Keluar</button>
+                    <button type="button" id="btnInv" onclick="setTipe('investasi')" class="py-3 rounded-2xl border-2 font-bold text-[10px] uppercase transition-all">Investasi</button>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase ml-1 tracking-widest">Tanggal</label>
+                    <input type="date" id="tanggal" class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-sm focus:border-blue-500 outline-none text-white transition" required>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase ml-1">Kategori</label>
+                    <select id="kategori" class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-sm focus:border-blue-500 outline-none text-white transition">
+                    </select>
+                </div>
+
+                <div id="unitSection" class="hidden grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1">Jumlah Unit</label>
+                        <input type="number" step="any" id="unitCount" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-sm outline-none text-white">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1">Satuan</label>
+                        <select id="unitType" class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-sm outline-none text-white">
+                            <option value="CASH">CASH</option>
+                            <option value="LOT">LOT</option>
+                            <option value="GRAM">GRAM</option>
+                            <option value="UNIT">UNIT</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase ml-1 tracking-widest">Nominal (Rp)</label>
+                    <input type="number" id="nominal" placeholder="0" class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-sm focus:border-blue-500 outline-none text-white" required>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase ml-1 tracking-widest">Keterangan</label>
+                    <input type="text" id="keterangan" placeholder="..." class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-sm focus:border-blue-500 outline-none text-white" required>
+                </div>
+
+                <div class="pt-6">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl text-xs font-bold shadow-xl shadow-blue-900/30 transition active:scale-95 uppercase tracking-widest">Simpan Transaksi</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        let tipeAktif = 'pemasukan';
+        const kategoriData = {
+            pemasukan: ['Gaji', 'WD Profit Trading', 'Bonus', 'Lain-lain'],
+            pengeluaran: ['Makan & Minum', 'Modal Trading (Deposit)', 'Operasional', 'Dana Darurat'],
+            investasi: ['Beli Aset', 'Jual Aset']
+        };
+
+        // Set Tanggal Otomatis ke Hari Ini
+        document.getElementById('tanggal').valueAsDate = new Date();
+
+        // Fungsi Ganti UI Tipe
+        function setTipe(tipe) {
+            tipeAktif = tipe;
+            const bIn = document.getElementById('btnIn');
+            const bOut = document.getElementById('btnOut');
+            const bInv = document.getElementById('btnInv');
+            const unitSect = document.getElementById('unitSection');
+            const selectKat = document.getElementById('kategori');
+
+            // Reset Styles
+            [bIn, bOut, bInv].forEach(btn => {
+                btn.className = "py-3 rounded-2xl border-2 border-slate-700 text-slate-500 font-bold text-[10px] uppercase transition-all";
+                btn.classList.remove('bg-blue-500/10', 'bg-red-500/10', 'bg-purple-500/10');
+            });
+
+            if (tipe === 'pemasukan') {
+                bIn.classList.replace('border-slate-700', 'border-blue-500');
+                bIn.classList.replace('text-slate-500', 'text-blue-400');
+                bIn.classList.add('bg-blue-500/10');
+                unitSect.classList.add('hidden');
+            } else if (tipe === 'pengeluaran') {
+                bOut.classList.replace('border-slate-700', 'border-red-500');
+                bOut.classList.replace('text-slate-500', 'text-red-400');
+                bOut.classList.add('bg-red-500/10');
+                unitSect.classList.add('hidden');
+            } else {
+                bInv.classList.replace('border-slate-700', 'border-purple-500');
+                bInv.classList.replace('text-slate-500', 'text-purple-400');
+                bInv.classList.add('bg-purple-500/10');
+                unitSect.classList.remove('hidden');
+            }
+
+            // Update Kategori Dropdown
+            selectKat.innerHTML = '';
+            kategoriData[tipe].forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item;
+                opt.text = item;
+                selectKat.appendChild(opt);
+            });
+        }
+
+        // Logic Simpan ke Cloud (Supabase)
+        document.getElementById('formTx').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const rawDate = document.getElementById('tanggal').value;
+            const [y, m, d] = rawDate.split('-');
+            const formattedDate = `${d}/${m}/${y}`;
+
+            const dataTrans = {
+                date: formattedDate,
+                type: tipeAktif,
+                kategori: document.getElementById('kategori').value,
+                amount: parseFloat(document.getElementById('nominal').value) || 0,
+                keterangan: document.getElementById('keterangan').value,
+                unitCount: parseFloat(document.getElementById('unitCount').value || 0),
+                unitType: document.getElementById('unitType').value || 'CASH'
+            };
+
+            try {
+                // saveTransactionToCloud didefinisikan di db.js
+                const result = await saveTransactionToCloud(dataTrans);
+                
+                if (result) {
+                    alert("Sip, data mendarat di Singapura, Bay! 🛡️☁️");
+                    document.getElementById('formTx').reset();
+                    document.getElementById('tanggal').valueAsDate = new Date();
+                    setTipe('pemasukan');
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Gagal kirim ke Cloud. Cek koneksi!");
+            }
+        });
+
+        // Jalankan awal
+        setTipe('pemasukan');
+    </script>
+</body>
+</html>

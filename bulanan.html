@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluasi Bulanan | Bayu Alfianto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/db.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex">
+
+    <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400">
+        <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic">Bayu Alfianto</h2>
+        <nav class="space-y-8">
+            <div>
+                <p class="text-[10px] font-bold mb-4 px-3 tracking-widest uppercase text-slate-500">Utama</p>
+                <ul class="space-y-2">
+                    <li><a href="index.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📊 Dashboard</a></li>
+                    <li><a href="transaksi.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💸 Transaksi</a></li>
+                    <li><a href="aset.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💎 Manajemen Aset</a></li>
+                </ul>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold mb-4 px-3 tracking-widest uppercase text-slate-500">Laporan</p>
+                <ul class="space-y-2">
+                    <li><a href="history.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📜 Riwayat Lengkap</a></li>
+                    <li><a href="bulanan.html" class="block px-3 py-2 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 font-bold">📅 Laporan Bulanan</a></li>
+                    <li><a href="tahunan.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📈 Laporan Tahunan</a></li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-8">
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white uppercase italic">Monthly Cashflow</h1>
+                <p id="display-month" class="text-xs text-slate-500 font-bold uppercase tracking-widest italic">Memuat...</p>
+            </div>
+            <div class="flex gap-2">
+                <select id="select-month" onchange="renderMonthly()" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold outline-none text-white transition focus:border-blue-500">
+                    <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+                    <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+                    <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+                    <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+                </select>
+                <select id="select-year" onchange="renderMonthly()" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold outline-none text-white transition focus:border-blue-500">
+                </select>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700">
+                <p class="text-[10px] font-bold text-slate-500 uppercase mb-2">Total Inflow</p>
+                <p id="total-inflow" class="text-xl font-bold text-green-400">Rp 0</p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700">
+                <p class="text-[10px] font-bold text-slate-500 uppercase mb-2">Total Outflow</p>
+                <p id="total-outflow" class="text-xl font-bold text-red-400">Rp 0</p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700">
+                <p class="text-[10px] font-bold text-slate-500 uppercase mb-2">Investment</p>
+                <p id="total-invest" class="text-xl font-bold text-purple-400">Rp 0</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+            <div class="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 text-center">
+                <h3 class="text-[10px] font-bold uppercase mb-8 tracking-widest text-slate-400">Struktur Pemasukan (Inflow)</h3>
+                <div class="aspect-square max-w-[250px] mx-auto">
+                    <canvas id="chartInflow"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 text-center">
+                <h3 class="text-[10px] font-bold uppercase mb-8 tracking-widest text-slate-400">Struktur Pengeluaran (Outflow)</h3>
+                <div class="aspect-square max-w-[250px] mx-auto">
+                    <canvas id="chartOutflow"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="insight-box" class="bg-blue-600/10 border border-blue-500/30 p-8 rounded-[2.5rem] text-center">
+            <h3 class="text-sm font-bold uppercase mb-2 text-blue-400 italic italic">💡 Evaluation Insight</h3>
+            <p id="insight-text" class="text-xs leading-relaxed text-slate-300 italic">Menganalisa cashflow lo, Bay...</p>
+        </div>
+    </main>
+
+    <script type="module">
+    let chartIn = null;
+    let chartOut = null;
+
+    function generateYears() {
+        const selectYear = document.getElementById('select-year');
+        if (!selectYear) return;
+        const currentYear = new Date().getFullYear();
+        for (let y = 2024; y <= currentYear + 1; y++) {
+            const opt = document.createElement('option');
+            opt.value = y; opt.text = y;
+            if (y === currentYear) opt.selected = true;
+            selectYear.appendChild(opt);
+        }
+    }
+
+    async function renderMonthly() {
+        const targetMonth = parseInt(document.getElementById('select-month').value);
+        const targetYear = parseInt(document.getElementById('select-year').value);
+        
+        const dummyDate = new Date(targetYear, targetMonth - 1);
+        document.getElementById('display-month').innerText = dummyDate.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+
+        try {
+            // Pastikan fungsi global window.getTransactions sudah ada
+            if (typeof window.getTransactions !== 'function') {
+                console.error("Fungsi getTransactions belum siap.");
+                return;
+            }
+
+            const txs = await window.getTransactions();
+            console.log("Total data ditemukan:", txs.length);
+
+            let inflow = 0, outflow = 0, invest = 0;
+            let mapInflow = {}, mapOutflow = {};
+
+            txs.forEach(tx => {
+                // HANDLING TANGGAL: Antisipasi format DD/MM/YYYY atau YYYY-MM-DD
+                let dateStr = tx.date;
+                if (dateStr.includes('/')) {
+                    const parts = dateStr.split('/');
+                    dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`; // Balik ke ISO
+                }
+                
+                const dateObj = new Date(dateStr);
+                if (isNaN(dateObj.getTime())) return; // Skip kalau tanggal rusak
+
+                const m = dateObj.getMonth() + 1;
+                const y = dateObj.getFullYear();
+
+                if (m !== targetMonth || y !== targetYear) return;
+                
+                const amt = parseFloat(tx.amount) || 0;
+                const kat = tx.category || tx.kategori || 'Lainnya';
+
+                if (tx.type === 'pemasukan') {
+                    inflow += amt;
+                    mapInflow[kat] = (mapInflow[kat] || 0) + amt;
+                } else if (tx.type === 'pengeluaran') {
+                    outflow += amt;
+                    mapOutflow[kat] = (mapOutflow[kat] || 0) + amt;
+                } else if (tx.type === 'investasi') {
+                    invest += amt;
+                    mapOutflow['Investasi'] = (mapOutflow['Investasi'] || 0) + amt;
+                }
+            });
+
+            const toIDR = (n) => `Rp ${n.toLocaleString('id-ID')}`;
+            document.getElementById('total-inflow').innerText = toIDR(inflow);
+            document.getElementById('total-outflow').innerText = toIDR(outflow);
+            document.getElementById('total-invest').innerText = toIDR(invest);
+
+            const net = inflow - (outflow + invest); 
+            const insightText = document.getElementById('insight-text');
+            if (inflow > 0 || outflow > 0 || invest > 0) {
+                insightText.innerHTML = `Sisa saldo bulan ini: <b>${toIDR(net)}</b>. <br> ${net > 0 ? '🔥 Cashflow positif, amankan aset!' : '⚠️ Cashflow negatif, perketat ikat pinggang!'}`;
+            } else {
+                insightText.innerText = "Belum ada data untuk periode ini.";
+            }
+
+            updateChart('chartInflow', mapInflow, 'inflow');
+            updateChart('chartOutflow', mapOutflow, 'outflow');
+
+        } catch (err) {
+            console.error("Gagal load data bulanan:", err);
+        }
+    }
+
+    function updateChart(canvasId, dataMap, type) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        const labels = Object.keys(dataMap);
+        const values = Object.values(dataMap);
+        
+        if (type === 'inflow' && chartIn) chartIn.destroy();
+        if (type === 'outflow' && chartOut) chartOut.destroy();
+
+        const colors = type === 'inflow' 
+            ? ['#10b981', '#34d399', '#059669', '#6ee7b7'] 
+            : ['#ef4444', '#3b82f6', '#a855f7', '#f59e0b', '#64748b', '#ec4899'];
+
+        const newChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels.length ? labels : ['No Data'],
+                datasets: [{
+                    data: values.length ? values : [1],
+                    backgroundColor: labels.length ? colors : ['#1e293b'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { 
+                        position: 'bottom', 
+                        labels: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, padding: 15 } 
+                    }
+                },
+                cutout: '75%',
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        if (type === 'inflow') chartIn = newChart;
+        else chartOut = newChart;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        generateYears();
+        const now = new Date();
+        document.getElementById('select-month').value = now.getMonth() + 1;
+
+        // Jeda sedikit lebih lama untuk memastikan db.js konek ke IndexedDB
+        setTimeout(renderMonthly, 500); 
+
+        document.getElementById('select-month').addEventListener('change', renderMonthly);
+        document.getElementById('select-year').addEventListener('change', renderMonthly);
+    });
+</script>
+</body>
+</html>

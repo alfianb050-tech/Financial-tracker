@@ -293,13 +293,54 @@
     <script src="db.js"></script>
 
     <script>
+        // Fungsi Login
         async function prosesLogin() {
-            // ... kode login ...
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            const btn = document.getElementById('btn-login');
+            const errorMsg = document.getElementById('error-msg');
+            
+            btn.innerText = "AUTHORIZING...";
+            btn.disabled = true;
+
+            try {
+                // Manggil fungsi dari db.js
+                await window.handleLogin(email, pass);
+                document.getElementById('auth-overlay').classList.add('hidden');
+                // Setelah login sukses, baru render datanya
+                renderDashboard();
+            } catch (err) {
+                errorMsg.innerText = "AKSES DITOLAK: " + err.message;
+                errorMsg.classList.remove('hidden');
+                btn.innerText = "AUTHORIZE";
+                btn.disabled = false;
+            }
         }
-        async function checkAuth() {
-            // ... kode cek login ...
+
+        // Cek Status Auth & Jalankan Aplikasi
+        async function initApp() {
+            try {
+                // Pastikan supabase client sudah siap
+                if (!window.supabase) {
+                    console.error("Supabase belum siap!");
+                    return;
+                }
+
+                const { data: { user } } = await window.supabase.auth.getUser();
+                
+                if (user) {
+                    document.getElementById('auth-overlay').classList.add('hidden');
+                    renderDashboard();
+                } else {
+                    document.getElementById('auth-overlay').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error("Init Error:", e);
+            }
         }
-        checkAuth();
+
+        // GANTI window.onload lo dengan ini biar tertib
+        window.addEventListener('load', initApp);
     </script>
 
 </body>

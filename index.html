@@ -87,6 +87,42 @@
         </div>
     </main>
 
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950/90 backdrop-blur-md border-t border-slate-800 px-4 py-3 z-50">
+    <ul class="flex justify-around items-center">
+        <li>
+            <a href="index.html" class="flex flex-col items-center gap-1 group">
+                <span class="text-lg group-hover:scale-110 transition">📊</span>
+                <span class="text-[9px] font-black uppercase tracking-tighter text-slate-500 group-focus:text-blue-500">Dash</span>
+            </a>
+        </li>
+        <li>
+            <a href="bulanan.html" class="flex flex-col items-center gap-1 group">
+                <span class="text-lg group-hover:scale-110 transition">📅</span>
+                <span class="text-[9px] font-black uppercase tracking-tighter text-slate-500 group-focus:text-blue-500">Bulan</span>
+            </a>
+        </li>
+        <li>
+            <a href="tahunan.html" class="flex flex-col items-center gap-1 group">
+                <span class="text-lg group-hover:scale-110 transition">📈</span>
+                <span class="text-[9px] font-black uppercase tracking-tighter text-slate-500 group-focus:text-blue-500">Tahun</span>
+            </a>
+        </li>
+        <li>
+            <a href="aset.html" class="flex flex-col items-center gap-1 group">
+                <span class="text-lg group-hover:scale-110 transition">💎</span>
+                <span class="text-[9px] font-black uppercase tracking-tighter text-slate-500 group-focus:text-blue-500">Aset</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<style>
+    /* Biar konten paling bawah ga ketutup menu ini */
+    @media (max-width: 768px) {
+        main { padding-bottom: 100px !important; }
+    }
+</style>
+
     <script>
     // GANTI FUNGSI LAMA LO DENGAN VERSI ASYNC INI
     async function renderDashboard() {

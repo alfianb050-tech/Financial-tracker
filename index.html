@@ -11,18 +11,18 @@
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex">
 
     <div id="auth-overlay" class="fixed inset-0 bg-slate-950 z-[100] flex items-center justify-center p-6 hidden">
-    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl w-full max-w-md shadow-2xl">
-        <h2 class="text-2xl font-black text-white mb-2 uppercase italic tracking-tighter">Wild Mindset 🛡️</h2>
-        <p class="text-slate-500 text-sm mb-6 font-bold uppercase tracking-widest">Secure Access Only</p>
-        
-        <div class="space-y-4">
-            <input type="email" id="login-email" placeholder="EMAIL" class="w-full bg-slate-800 border border-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:border-blue-500">
-            <input type="password" id="login-pass" placeholder="PASSWORD" class="w-full bg-slate-800 border border-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:border-blue-500">
-            <button onclick="prosesLogin()" id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl transition-all uppercase tracking-widest">Authorize</button>
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl w-full max-w-md shadow-2xl">
+            <h2 class="text-2xl font-black text-white mb-2 uppercase italic tracking-tighter">Wild Mindset 🛡️</h2>
+            <p class="text-slate-500 text-sm mb-6 font-bold uppercase tracking-widest">Secure Access Only</p>
+            
+            <div class="space-y-4">
+                <input type="email" id="login-email" placeholder="EMAIL" class="w-full bg-slate-800 border border-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:border-blue-500">
+                <input type="password" id="login-pass" placeholder="PASSWORD" class="w-full bg-slate-800 border border-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:border-blue-500">
+                <button onclick="prosesLogin()" id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl transition-all uppercase tracking-widest">Authorize</button>
+            </div>
+            <p id="error-msg" class="text-red-500 text-xs mt-4 text-center font-bold hidden"></p>
         </div>
-        <p id="error-msg" class="text-red-500 text-xs mt-4 text-center font-bold hidden"></p>
     </div>
-</div>
 
     <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400">
         <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic">Bayu Alfianto</h2>
@@ -58,21 +58,18 @@
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-            <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-[2rem] shadow-xl relative overflow-hidden group">
+            <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-[2rem] shadow-xl">
                 <p class="text-blue-100 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Net Worth (Total)</p>
                 <h3 id="net-worth" class="text-2xl font-black text-white">Rp 0</h3>
             </div>
-
             <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-lg">
-                <p class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Liquid Cash (Sisa Tabungan)</p>
-                <h3 id="liquid-cash" class="text-2xl font-black text-white text-blue-400">Rp 0</h3>
+                <p class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Liquid Cash</p>
+                <h3 id="liquid-cash" class="text-2xl font-black text-blue-400">Rp 0</h3>
             </div>
-
             <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-lg">
-                <p id="label-cashflow" class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Cashflow (April)</p>
+                <p id="label-cashflow" class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Cashflow</p>
                 <h3 id="cashflow" class="text-2xl font-black text-green-400">Rp 0</h3>
             </div>
-
             <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-lg">
                 <p class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Emergency Fund</p>
                 <h3 id="emergency-fund" class="text-2xl font-black text-orange-500">Rp 0</h3>
@@ -82,266 +79,143 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 bg-slate-800 p-10 rounded-[3rem] border border-slate-700 min-h-[400px] flex flex-col shadow-2xl">
                 <div class="flex justify-between items-center mb-8">
-                    <p id="chart-title" class="text-slate-400 font-bold italic uppercase tracking-[0.2em] text-[10px]">Performa Tahunan 2026</p>
-                    <div class="flex items-center gap-2 text-[9px] font-bold text-slate-500"><div class="w-2 h-2 bg-blue-500 rounded-full"></div> NET PROFIT PER BULAN</div>
+                    <p id="chart-title" class="text-slate-400 font-bold italic uppercase tracking-[0.2em] text-[10px]">Performa Tahunan</p>
                 </div>
                 <div class="w-full flex-1 relative">
                     <canvas id="dashboardChart"></canvas>
                 </div>
             </div>
-
             <div class="bg-slate-800 p-10 rounded-[3rem] border border-slate-700 shadow-2xl">
-                <h3 class="text-[10px] font-bold mb-10 text-slate-500 uppercase tracking-[0.2em] italic text-center">Distribusi Pengeluaran TAHUN INI</h3>
-                <div id="allocation-list" class="space-y-8">
-                </div>
+                <h3 class="text-[10px] font-bold mb-10 text-slate-500 uppercase tracking-[0.2em] italic text-center">Distribusi Pengeluaran</h3>
+                <div id="allocation-list" class="space-y-8"></div>
             </div>
         </div>
     </main>
 
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950/90 backdrop-blur-md border-t border-slate-800 px-4 py-3 z-50">
-    <ul class="flex justify-around items-center">
-        <li>
-            <a href="index.html" class="flex flex-col items-center gap-1 group">
-                <span class="text-lg group-hover:scale-110 transition">📊</span>
-                <span class="text-[9px] font-black uppercase tracking-tighter text-slate-500 group-focus:text-blue-500">Dash</span>
-            </a>
-        </li>
-        <li>
-            <a href="bulanan.html" class="flex flex-col items-center gap-1 group">
-                <span class="text-lg group-hover:scale-110 transition">📅</span>
-                <span class="text-[9px] font-black uppercase tracking-tighter text-slate-500 group-focus:text-blue-500">Bulan</span>
-            </a>
-        </li>
-        <li>
-            <a href="tahunan.html" class="flex flex-col items-center gap-1 group">
-                <span class="text-lg group-hover:scale-110 transition">📈</span>
-                <span class="text-[9px] font-black uppercase tracking-tighter text-slate-500 group-focus:text-blue-500">Tahun</span>
-            </a>
-        </li>
-        <li>
-            <a href="aset.html" class="flex flex-col items-center gap-1 group">
-                <span class="text-lg group-hover:scale-110 transition">💎</span>
-                <span class="text-[9px] font-black uppercase tracking-tighter text-slate-500 group-focus:text-blue-500">Aset</span>
-            </a>
-        </li>
-    </ul>
-</nav>
+        <ul class="flex justify-around items-center">
+            <li><a href="index.html" class="flex flex-col items-center gap-1"><span class="text-lg">📊</span><span class="text-[9px] font-black uppercase text-blue-500">Dash</span></a></li>
+            <li><a href="bulanan.html" class="flex flex-col items-center gap-1"><span class="text-lg">📅</span><span class="text-[9px] font-black uppercase text-slate-500">Bulan</span></a></li>
+            <li><a href="tahunan.html" class="flex flex-col items-center gap-1"><span class="text-lg">📈</span><span class="text-[9px] font-black uppercase text-slate-500">Tahun</span></a></li>
+            <li><a href="aset.html" class="flex flex-col items-center gap-1"><span class="text-lg">💎</span><span class="text-[9px] font-black uppercase text-slate-500">Aset</span></a></li>
+        </ul>
+    </nav>
 
-<style>
-    /* Biar konten paling bawah ga ketutup menu ini */
-    @media (max-width: 768px) {
-        main { padding-bottom: 100px !important; }
-    }
-</style>
-
-    <script>
-    // GANTI FUNGSI LAMA LO DENGAN VERSI ASYNC INI
-    async function renderDashboard() {
-        // --- 1. TARIK DATA DARI CLOUD (SUPABASE) ---
-        // Kita ganti localStorage dengan getTransactions() dari db.js
-        const txs = await getTransactions(); 
-        
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth() + 1;
-
-        const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-        
-        // Update UI Dasar
-        document.getElementById('label-cashflow').innerText = `Cashflow (${monthNames[currentMonth-1]})`;
-        document.getElementById('chart-title').innerText = `Performa Tahunan ${currentYear}`;
-        document.getElementById('current-date-display').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-        let totalIn_Lifetime = 0;
-        let totalOut_Lifetime = 0;
-        let totalModalAset_Active = 0;
-        let lifetimeEmergency = 0;
-        let cashflowMonth = 0;
-        
-        let categoriesYear = {}; 
-        const monthlyNetData = new Array(12).fill(0);
-
-        // --- 2. LOGIKA PERHITUNGAN ---
-        if (txs && txs.length > 0) {
-            txs.forEach(tx => {
-                const amt = parseInt(tx.amount);
-                // Pastikan format tanggal aman
-                const [d, m, y] = tx.date.split('/');
-                const txMonth = parseInt(m);
-                const txYear = parseInt(y);
-
-                // Logic Lifetime
-                if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') {
-                    totalIn_Lifetime += amt;
-                } else {
-                    totalOut_Lifetime += amt;
-                }
-
-                // Modal Aset
-                if (tx.type === 'investasi') {
-                    if (tx.kategori === 'Beli Aset') totalModalAset_Active += amt;
-                    else totalModalAset_Active -= amt;
-                }
-
-                // Dana Darurat
-                if (tx.kategori.toLowerCase().includes('darurat')) {
-                    lifetimeEmergency += amt;
-                }
-
-                // Bulan Berjalan
-                if (txMonth === currentMonth && txYear === currentYear) {
-                    if (tx.type === 'pemasukan') cashflowMonth += amt;
-                    else cashflowMonth -= amt;
-                }
-
-                // Grafik & Alokasi (Tahun Ini)
-                if (txYear === currentYear) {
-                    if (tx.type === 'pemasukan') monthlyNetData[txMonth - 1] += amt;
-                    else monthlyNetData[txMonth - 1] -= amt;
-
-                    if (tx.type !== 'pemasukan') {
-                        categoriesYear[tx.kategori] = (categoriesYear[tx.kategori] || 0) + amt;
-                    }
-                }
-            });
-        }
-
-        // --- 3. UPDATE TAMPILAN ANGKA ---
-        const liquidCash = totalIn_Lifetime - totalOut_Lifetime;
-        const netWorthTotal = liquidCash + totalModalAset_Active;
-
-        document.getElementById('net-worth').innerText = `Rp ${netWorthTotal.toLocaleString('id-ID')}`;
-        document.getElementById('liquid-cash').innerText = `Rp ${liquidCash.toLocaleString('id-ID')}`;
-        document.getElementById('emergency-fund').innerText = `Rp ${lifetimeEmergency.toLocaleString('id-ID')}`;
-
-        const cfElement = document.getElementById('cashflow');
-        cfElement.innerText = `${cashflowMonth >= 0 ? '+' : ''} Rp ${cashflowMonth.toLocaleString('id-ID')}`;
-        cfElement.className = `text-2xl font-black ${cashflowMonth >= 0 ? 'text-green-400' : 'text-red-400'}`;
-
-        // --- 4. UPDATE LIST ALOKASI ---
-        const allocationList = document.getElementById('allocation-list');
-        allocationList.innerHTML = '';
-        const totalSpentYear = Object.values(categoriesYear).reduce((a, b) => a + b, 0);
-        const sortedCats = Object.entries(categoriesYear).sort((a, b) => b[1] - a[1]);
-
-        sortedCats.forEach(([name, value]) => {
-            const percent = totalSpentYear > 0 ? ((value / totalSpentYear) * 100).toFixed(0) : 0;
-            let color = 'bg-slate-600';
-            if (name.toLowerCase().includes('aset') || name.toLowerCase().includes('inves')) color = 'bg-purple-500';
-            if (name.toLowerCase().includes('makan') || name.toLowerCase().includes('rokok')) color = 'bg-blue-500';
-
-            allocationList.innerHTML += `
-                <div>
-                    <div class="flex justify-between text-[9px] mb-2 uppercase font-black tracking-tighter text-slate-400">
-                        <span>${name}</span><span>${percent}%</span>
-                    </div>
-                    <div class="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
-                        <div class="${color} h-full transition-all duration-1000" style="width: ${percent}%"></div>
-                    </div>
-                </div>`;
-        });
-
-        // --- 5. RENDER ULANG CHART ---
-        renderChart(monthlyNetData);
-    }
-
-    // Fungsi terpisah buat Chart biar rapi
-    function renderChart(dataPoints) {
-        const ctx = document.getElementById('dashboardChart').getContext('2d');
-        
-        // Hapus chart lama kalau ada (biar nggak tumpang tindih pas refresh)
-        if (window.myChart) {
-            window.myChart.destroy();
-        }
-
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
-        gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
-
-        window.myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
-                datasets: [{
-                    data: dataPoints,
-                    borderColor: '#3b82f6',
-                    borderWidth: 3,
-                    pointRadius: 0,
-                    backgroundColor: gradient,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#475569', font: { size: 9 } } },
-                    x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 9 } } }
-                }
-            }
-        });
-    }
-
-    // Jalankan pas halaman beres loading
-    window.onload = renderDashboard;
-</script>
+    <style>
+        @media (max-width: 768px) { main { padding-bottom: 100px !important; } }
+    </style>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script src="db.js"></script>
 
     <script>
-        // Fungsi Login
-        async function prosesLogin() {
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
-            const btn = document.getElementById('btn-login');
-            const errorMsg = document.getElementById('error-msg');
-            
-            btn.innerText = "AUTHORIZING...";
-            btn.disabled = true;
-
+        // 1. LOGIKA RENDER DATA
+        async function renderDashboard() {
             try {
-                // Manggil fungsi dari db.js
-                await window.handleLogin(email, pass);
-                document.getElementById('auth-overlay').classList.add('hidden');
-                // Setelah login sukses, baru render datanya
-                renderDashboard();
-            } catch (err) {
-                errorMsg.innerText = "AKSES DITOLAK: " + err.message;
-                errorMsg.classList.remove('hidden');
-                btn.innerText = "AUTHORIZE";
-                btn.disabled = false;
-            }
-        }
+                const txs = await window.getTransactions();
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth() + 1;
+                const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
-        // Cek Status Auth & Jalankan Aplikasi
-        async function initApp() {
-            try {
-                // Pastikan supabase client sudah siap
-                if (!window.supabase) {
-                    console.error("Supabase belum siap!");
-                    return;
-                }
+                document.getElementById('label-cashflow').innerText = `Cashflow (${monthNames[currentMonth-1]})`;
+                document.getElementById('chart-title').innerText = `Performa Tahunan ${currentYear}`;
+                document.getElementById('current-date-display').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-                const { data: { user } } = await window.supabase.auth.getUser();
+                let totalIn = 0, totalOut = 0, totalAset = 0, emergency = 0, cfMonth = 0;
+                let catsYear = {};
+                const chartData = new Array(12).fill(0);
+
+                txs.forEach(tx => {
+                    const amt = parseInt(tx.amount);
+                    const [d, m, y] = tx.date.split('/');
+                    const tM = parseInt(m);
+                    const tY = parseInt(y);
+
+                    if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') totalIn += amt;
+                    else totalOut += amt;
+
+                    if (tx.type === 'investasi') {
+                        if (tx.kategori === 'Beli Aset') totalAset += amt;
+                        else totalAset -= amt;
+                    }
+
+                    if (tx.kategori.toLowerCase().includes('darurat')) emergency += amt;
+
+                    if (tM === currentMonth && tY === currentYear) {
+                        cfMonth += (tx.type === 'pemasukan') ? amt : -amt;
+                    }
+
+                    if (tY === currentYear) {
+                        chartData[tM - 1] += (tx.type === 'pemasukan') ? amt : -amt;
+                        if (tx.type !== 'pemasukan') catsYear[tx.kategori] = (catsYear[tx.kategori] || 0) + amt;
+                    }
+                });
+
+                const liquid = totalIn - totalOut;
+                document.getElementById('net-worth').innerText = `Rp ${(liquid + totalAset).toLocaleString('id-ID')}`;
+                document.getElementById('liquid-cash').innerText = `Rp ${liquid.toLocaleString('id-ID')}`;
+                document.getElementById('emergency-fund').innerText = `Rp ${emergency.toLocaleString('id-ID')}`;
                 
-                if (user) {
-                    document.getElementById('auth-overlay').classList.add('hidden');
-                    renderDashboard();
-                } else {
-                    document.getElementById('auth-overlay').classList.remove('hidden');
-                }
-            } catch (e) {
-                console.error("Init Error:", e);
+                const cfEl = document.getElementById('cashflow');
+                cfEl.innerText = `${cfMonth >= 0 ? '+' : ''} Rp ${cfMonth.toLocaleString('id-ID')}`;
+                cfEl.className = `text-2xl font-black ${cfMonth >= 0 ? 'text-green-400' : 'text-red-400'}`;
+
+                const list = document.getElementById('allocation-list');
+                list.innerHTML = '';
+                const totalSpent = Object.values(catsYear).reduce((a, b) => a + b, 0);
+                Object.entries(catsYear).sort((a,b) => b[1]-a[1]).forEach(([name, val]) => {
+                    const pct = totalSpent > 0 ? ((val/totalSpent)*100).toFixed(0) : 0;
+                    list.innerHTML += `<div><div class="flex justify-between text-[9px] mb-2 uppercase font-black text-slate-400"><span>${name}</span><span>${pct}%</span></div><div class="w-full bg-slate-900 h-1 rounded-full overflow-hidden"><div class="bg-blue-500 h-full" style="width: ${pct}%"></div></div></div>`;
+                });
+
+                renderChart(chartData);
+            } catch (e) { console.error(e); }
+        }
+
+        function renderChart(pts) {
+            const ctx = document.getElementById('dashboardChart').getContext('2d');
+            if (window.myChart) window.myChart.destroy();
+            window.myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
+                    datasets: [{ data: pts, borderColor: '#3b82f6', borderWidth: 3, pointRadius: 0, fill: true, tension: 0.4, backgroundColor: 'rgba(59, 130, 246, 0.1)' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        // 2. LOGIKA AUTH & LOGIN
+        async function prosesLogin() {
+            const e = document.getElementById('login-email').value;
+            const p = document.getElementById('login-pass').value;
+            const b = document.getElementById('btn-login');
+            b.innerText = "AUTHORIZING...";
+            try {
+                await window.handleLogin(e, p);
+                location.reload();
+            } catch (err) {
+                alert("Error: " + err.message);
+                b.innerText = "AUTHORIZE";
             }
         }
 
-        // GANTI window.onload lo dengan ini biar tertib
+        async function initApp() {
+            if (!window.supabase) {
+                console.error("Supabase Error: Pastikan db.js sudah benar.");
+                return;
+            }
+            const { data: { user } } = await window.supabase.auth.getUser();
+            if (user) {
+                document.getElementById('auth-overlay').classList.add('hidden');
+                renderDashboard();
+            } else {
+                document.getElementById('auth-overlay').classList.remove('hidden');
+            }
+        }
+
         window.addEventListener('load', initApp);
     </script>
-
 </body>
 </html>

@@ -41,11 +41,9 @@
 
         <div class="mb-10 p-8 bg-gradient-to-br from-blue-600 to-blue-900 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
             <div class="relative z-10">
-                <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mb-2 italic">Total Kekayaan Terakumulasi (Cash + Assets)</p>
+                <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mb-2 italic">Total Kekayaan (Cash + Assets)</p>
                 <h2 id="total-wealth" class="text-4xl font-black italic text-white">Rp 0</h2>
-                <div id="wealth-summary" class="mt-4 text-[10px] text-blue-200 font-bold uppercase tracking-tighter">
-                    Menghubungi Server Singapura...
-                </div>
+                <div id="wealth-summary" class="mt-4 text-[10px] text-blue-200 font-bold uppercase tracking-tighter">Syncing with Singapore...</div>
             </div>
             <div class="absolute -right-10 -bottom-10 text-9xl opacity-10 italic font-black text-white uppercase">Asset</div>
         </div>
@@ -55,18 +53,16 @@
                 <div class="flex justify-between items-start mb-8">
                     <div>
                         <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 italic">🛡️ Dana Darurat</h3>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase">Safe Haven Reserve</p>
                     </div>
                     <span id="emergency-porsi-tag" class="text-[10px] font-mono font-bold text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">0% Portofolio</span>
                 </div>
-                
                 <div class="mb-6">
                     <p id="emergency-amount" class="text-3xl font-black mb-2 text-white">Rp 0</p>
                     <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
-                        <div id="bar-emergency" class="bg-blue-500 h-full w-[0%] shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-1000"></div>
+                        <div id="bar-emergency" class="bg-blue-500 h-full w-[0%] transition-all duration-1000"></div>
                     </div>
                     <div class="flex justify-between mt-3 text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
-                        <span id="emergency-progress">Progress Target: 0%</span>
+                        <span id="emergency-progress">Progress: 0%</span>
                         <span>Target: 10jt</span>
                     </div>
                 </div>
@@ -74,62 +70,46 @@
 
             <div class="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-xl flex flex-col">
                 <div class="flex justify-between items-start mb-8">
-                    <div>
-                        <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 italic">📈 Investasi Aktif</h3>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase">Crypto, Saham, & Logam Mulia</p>
-                    </div>
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 italic">📈 Investasi Aktif</h3>
                 </div>
                 <div id="active-investments" class="space-y-4">
-                    </div>
+                    <p class="text-[10px] text-slate-600 italic text-center py-10 uppercase">Loading Assets...</p>
+                </div>
             </div>
         </div>
     </main>
 
     <script>
-    /**
-     * FUNGSI UTAMA: MENGAMBIL DATA DARI SUPABASE (via db.js) & UPDATE UI
-     */
+    async function checkAuth() {
+        if (!window.supabase) return;
+        const { data: { user } } = await window.supabase.auth.getUser();
+        if (!user) window.location.href = 'index.html';
+        else updateAsetPage();
+    }
+
     async function updateAsetPage() {
         try {
-            // 1. Ambil data pake fungsi global yang udah kita bikin di db.js
             const transactions = await window.getTransactions();
-
             const wealthDisplay = document.getElementById('total-wealth');
             const emergencyDisplay = document.getElementById('emergency-amount');
             const emergencyBar = document.getElementById('bar-emergency');
-            const emergencyProgress = document.getElementById('emergency-progress');
             const investContainer = document.getElementById('active-investments');
-            const porsiTagEmergency = document.getElementById('emergency-porsi-tag');
-            const wealthSummary = document.getElementById('wealth-summary');
 
-            let cashBalance = 0; 
-            let emergencyVal = 0;
+            let cashBalance = 0, emergencyVal = 0, totalModalAset = 0;
             let assetMap = {};
-            let totalModalAset = 0;
 
-            // 2. LOGIKA PERHITUNGAN
             transactions.forEach(tx => {
                 const amt = parseFloat(tx.amount) || 0;
                 const unitQty = parseFloat(tx.unitCount) || 0;
                 
-                // Hitung Saldo Kas
-                if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') {
-                    cashBalance += amt;
-                } else {
-                    cashBalance -= amt;
-                }
+                if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') cashBalance += amt;
+                else cashBalance -= amt;
 
-                // Hitung Dana Darurat
-                if (tx.kategori.toLowerCase().includes('darurat')) {
-                    emergencyVal += amt;
-                }
+                if (tx.kategori.toLowerCase().includes('darurat')) emergencyVal += amt;
 
-                // Hitung Investasi
                 if (tx.type === 'investasi') {
                     const key = tx.keterangan.toUpperCase();
-                    if (!assetMap[key]) {
-                        assetMap[key] = { unit: 0, modal: 0, type: tx.unitType };
-                    }
+                    if (!assetMap[key]) assetMap[key] = { unit: 0, modal: 0, type: tx.unitType };
                     
                     if (tx.kategori === 'Beli Aset') {
                         assetMap[key].unit += unitQty;
@@ -143,81 +123,46 @@
                 }
             });
 
-            // 3. UPDATE TAMPILAN TOTAL
             const totalNetWorth = cashBalance + totalModalAset;
-            const toIDR = (num) => `Rp ${num.toLocaleString('id-ID')}`;
+            const toIDR = (n) => `Rp ${n.toLocaleString('id-ID')}`;
 
-            if (wealthDisplay) wealthDisplay.innerText = toIDR(totalNetWorth);
+            wealthDisplay.innerText = toIDR(totalNetWorth);
+            emergencyDisplay.innerText = toIDR(emergencyVal);
             
-            if (wealthSummary) {
-                const cashPercent = totalNetWorth > 0 ? ((cashBalance / totalNetWorth) * 100).toFixed(0) : 0;
-                const assetPercent = totalNetWorth > 0 ? ((totalModalAset / totalNetWorth) * 100).toFixed(0) : 0;
-                wealthSummary.innerText = `Cash: ${cashPercent}% | Assets: ${assetPercent}%`;
-            }
+            const target = 10000000;
+            const progress = Math.min((emergencyVal / target) * 100, 100);
+            emergencyBar.style.width = progress + '%';
+            document.getElementById('emergency-progress').innerText = `Progress: ${progress.toFixed(0)}%`;
+            document.getElementById('emergency-porsi-tag').innerText = `${totalNetWorth > 0 ? ((emergencyVal/totalNetWorth)*100).toFixed(1) : 0}% Portofolio`;
 
-            // 4. UPDATE DANA DARURAT
-            if (emergencyDisplay) {
-                emergencyDisplay.innerText = toIDR(emergencyVal);
-                const target = 10000000; 
-                const progressPercent = Math.min((emergencyVal / target) * 100, 100);
-                
-                if (emergencyBar) emergencyBar.style.width = progressPercent + '%';
-                if (emergencyProgress) emergencyProgress.innerText = `Progress Target: ${progressPercent.toFixed(0)}%`;
-                
-                const porsiEmergency = totalNetWorth > 0 ? ((emergencyVal / totalNetWorth) * 100).toFixed(1) : 0;
-                if (porsiTagEmergency) porsiTagEmergency.innerText = `${porsiEmergency}% Portofolio`;
-            }
-
-            // 5. RENDER LIST INVESTASI
-            if (investContainer) {
-                investContainer.innerHTML = '';
-                const assets = Object.entries(assetMap);
-
-                if (assets.length === 0) {
-                    investContainer.innerHTML = `<p class="text-[10px] text-slate-600 italic text-center py-10 uppercase">Belum ada portofolio aktif</p>`;
-                } else {
-                    assets.sort((a, b) => b[1].modal - a[1].modal);
-                    assets.forEach(([name, data]) => {
-                        if (data.unit <= 0) return;
-
-                        const porsiAset = totalNetWorth > 0 ? ((data.modal / totalNetWorth) * 100).toFixed(1) : 0;
-                        let color = 'text-purple-400';
-                        let barColor = 'bg-purple-500';
-                        const unitTag = (data.type || '').toUpperCase();
-                        
-                        if (['GRAM', 'EMAS', 'XAU'].includes(unitTag)) { color = 'text-yellow-500'; barColor = 'bg-yellow-500'; }
-                        else if (['LOT', 'SAHAM'].includes(unitTag)) { color = 'text-blue-400'; barColor = 'bg-blue-400'; }
-                        else if (['USDT', 'BTC', 'CRYPTO'].includes(unitTag)) { color = 'text-orange-400'; barColor = 'bg-orange-500'; }
-
-                        investContainer.innerHTML += `
-                            <div class="p-4 bg-slate-900/40 rounded-2xl border border-slate-700/50 hover:border-slate-600 transition-all group">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="text-[10px] font-black ${color} uppercase tracking-widest">${name}</span>
-                                    <span class="text-[9px] font-bold text-slate-500">${porsiAset}% PORSI</span>
+            investContainer.innerHTML = '';
+            const assets = Object.entries(assetMap).filter(([_, d]) => d.unit > 0);
+            
+            if (assets.length === 0) {
+                investContainer.innerHTML = `<p class="text-[10px] text-slate-600 italic text-center py-10 uppercase">Belum ada portofolio aktif</p>`;
+            } else {
+                assets.sort((a, b) => b[1].modal - a[1].modal).forEach(([name, data]) => {
+                    const porsi = totalNetWorth > 0 ? ((data.modal / totalNetWorth) * 100).toFixed(1) : 0;
+                    investContainer.innerHTML += `
+                        <div class="p-4 bg-slate-900/40 rounded-2xl border border-slate-700/50 transition-all">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[10px] font-black uppercase text-blue-400 tracking-widest">${name}</span>
+                                <span class="text-[9px] font-bold text-slate-500">${porsi}% PORSI</span>
+                            </div>
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <p class="text-[8px] text-slate-500 uppercase font-black">Modal Terpakai</p>
+                                    <p class="text-lg font-black text-white">${toIDR(data.modal)}</p>
                                 </div>
-                                <div class="w-full bg-slate-800 h-1 rounded-full mb-3 overflow-hidden">
-                                    <div class="${barColor} h-full transition-all duration-1000" style="width: ${porsiAset}%"></div>
-                                </div>
-                                <div class="flex justify-between items-end">
-                                    <div>
-                                        <p class="text-[8px] text-slate-500 uppercase font-black tracking-tighter">Modal Terpakai</p>
-                                        <p class="text-lg font-black text-white">${toIDR(data.modal)}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-[10px] font-mono text-slate-400 font-bold">${data.unit} ${data.type}</p>
-                                    </div>
-                                </div>
-                            </div>`;
-                    });
-                }
+                                <div class="text-right text-[10px] font-mono text-slate-400 font-bold">${data.unit} ${data.type}</div>
+                            </div>
+                        </div>`;
+                });
             }
-        } catch (err) {
-            console.error("Critical Error Aset:", err);
-        }
+        } catch (err) { console.error(err); }
     }
 
-    // Jalankan saat halaman dibuka
-    window.onload = updateAsetPage;
+    window.onload = checkAuth;
     </script>
 </body>
 </html>

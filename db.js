@@ -1,10 +1,14 @@
 const SUPABASE_URL = 'https://cxryyztccnyhszkeetmx.supabase.co'; // Ganti pake URL lo
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4cnl5enRjY255aHN6a2VldG14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NzM5ODgsImV4cCI6MjA5MjQ0OTk4OH0.dkHgRdG9OlTyExJoHtNLrm9F3Z-4fwIGgIbEh_yQt4E'; // Ganti pake Anon Key lo
 
-// Inisialisasi - Pastikan variabel SB_URL dan SB_KEY dipanggil dengan benar
-const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+// 1. Deklarasi Data (PASTIIN TULISANNYA SAMA PERSIS)
+const cloudUrl = 'https://xyz.supabase.co'; // Ganti pake URL lo
+const cloudKey = 'eyJhbGciOiJIUzI1Ni...'; // Ganti pake Key lo
 
-// Lempar ke Global agar index.html bisa baca
+// 2. Inisialisasi Mesin
+const supabaseClient = supabase.createClient(cloudUrl, cloudKey);
+
+// 3. Lempar ke Global (Biar index.html gak bingung)
 window.supabase = supabaseClient;
 
 /** FUNGSI LOGIN **/
@@ -14,10 +18,10 @@ window.handleLogin = async (email, password) => {
     return data;
 };
 
-/** FUNGSI AMBIL DATA **/
+/** FUNGSI TARIK DATA **/
 window.getTransactions = async () => {
     const { data, error } = await supabaseClient
-        .from('transaksi') // Pastikan nama tabel lo 'transaksi'
+        .from('transaksi') // Pastikan nama tabel di Supabase lo 'transaksi'
         .select('*')
         .order('id', { ascending: false });
     if (error) {

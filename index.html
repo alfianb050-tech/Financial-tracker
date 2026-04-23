@@ -13,6 +13,20 @@
 
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex">
 
+    <div id="auth-overlay" class="fixed inset-0 bg-slate-950 z-[100] flex items-center justify-center p-6 hidden">
+    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl w-full max-w-md shadow-2xl">
+        <h2 class="text-2xl font-black text-white mb-2 uppercase italic tracking-tighter">Wild Mindset 🛡️</h2>
+        <p class="text-slate-500 text-sm mb-6 font-bold uppercase tracking-widest">Secure Access Only</p>
+        
+        <div class="space-y-4">
+            <input type="email" id="login-email" placeholder="EMAIL" class="w-full bg-slate-800 border border-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:border-blue-500">
+            <input type="password" id="login-pass" placeholder="PASSWORD" class="w-full bg-slate-800 border border-slate-700 p-4 rounded-xl text-white font-bold outline-none focus:border-blue-500">
+            <button onclick="prosesLogin()" id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl transition-all uppercase tracking-widest">Authorize</button>
+        </div>
+        <p id="error-msg" class="text-red-500 text-xs mt-4 text-center font-bold hidden"></p>
+    </div>
+</div>
+
     <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400">
         <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic">Bayu Alfianto</h2>
         <nav class="space-y-8">
@@ -276,6 +290,20 @@
     // Jalankan pas halaman beres loading
     window.onload = renderDashboard;
 </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="db.js"></script>
+
+    <script>
+        async function prosesLogin() {
+            // ... kode login ...
+        }
+        async function checkAuth() {
+            // ... kode cek login ...
+        }
+        checkAuth();
+    </script>
 
 </body>
 </html>

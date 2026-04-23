@@ -88,157 +88,78 @@
     </main>
 
     <script>
-    // GANTI FUNGSI LAMA LO DENGAN VERSI ASYNC INI
-    async function renderDashboard() {
-        // --- 1. TARIK DATA DARI CLOUD (SUPABASE) ---
-        // Kita ganti localStorage dengan getTransactions() dari db.js
-        const txs = await getTransactions(); 
-        
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth() + 1;
+// 🔐 CEK LOGIN
+async function checkAuth() {
+    const { data } = await _supabase.auth.getSession();
 
-        const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-        
-        // Update UI Dasar
-        document.getElementById('label-cashflow').innerText = `Cashflow (${monthNames[currentMonth-1]})`;
-        document.getElementById('chart-title').innerText = `Performa Tahunan ${currentYear}`;
-        document.getElementById('current-date-display').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    if (!data.session) {
+        window.location.href = "login.html";
+        return false;
+    }
+    return true;
+}
 
-        let totalIn_Lifetime = 0;
-        let totalOut_Lifetime = 0;
-        let totalModalAset_Active = 0;
-        let lifetimeEmergency = 0;
-        let cashflowMonth = 0;
-        
-        let categoriesYear = {}; 
-        const monthlyNetData = new Array(12).fill(0);
+// 🚪 LOGOUT
+async function logout() {
+    await _supabase.auth.signOut();
+    window.location.href = "login.html";
+}
 
-        // --- 2. LOGIKA PERHITUNGAN ---
-        if (txs && txs.length > 0) {
-            txs.forEach(tx => {
-                const amt = parseInt(tx.amount);
-                // Pastikan format tanggal aman
-                const [d, m, y] = tx.date.split('/');
-                const txMonth = parseInt(m);
-                const txYear = parseInt(y);
+// 📊 RENDER DATA
+async function renderDashboard() {
+    const txs = await getTransactions();
+    const list = document.getElementById("list");
 
-                // Logic Lifetime
-                if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') {
-                    totalIn_Lifetime += amt;
-                } else {
-                    totalOut_Lifetime += amt;
-                }
+    list.innerHTML = "";
 
-                // Modal Aset
-                if (tx.type === 'investasi') {
-                    if (tx.kategori === 'Beli Aset') totalModalAset_Active += amt;
-                    else totalModalAset_Active -= amt;
-                }
+    let total = 0;
 
-                // Dana Darurat
-                if (tx.kategori.toLowerCase().includes('darurat')) {
-                    lifetimeEmergency += amt;
-                }
+    txs.forEach(tx => {
+        const amt = parseInt(tx.amount || 0);
+        total += amt;
 
-                // Bulan Berjalan
-                if (txMonth === currentMonth && txYear === currentYear) {
-                    if (tx.type === 'pemasukan') cashflowMonth += amt;
-                    else cashflowMonth -= amt;
-                }
-
-                // Grafik & Alokasi (Tahun Ini)
-                if (txYear === currentYear) {
-                    if (tx.type === 'pemasukan') monthlyNetData[txMonth - 1] += amt;
-                    else monthlyNetData[txMonth - 1] -= amt;
-
-                    if (tx.type !== 'pemasukan') {
-                        categoriesYear[tx.kategori] = (categoriesYear[tx.kategori] || 0) + amt;
-                    }
-                }
-            });
-        }
-
-        // --- 3. UPDATE TAMPILAN ANGKA ---
-        const liquidCash = totalIn_Lifetime - totalOut_Lifetime;
-        const netWorthTotal = liquidCash + totalModalAset_Active;
-
-        document.getElementById('net-worth').innerText = `Rp ${netWorthTotal.toLocaleString('id-ID')}`;
-        document.getElementById('liquid-cash').innerText = `Rp ${liquidCash.toLocaleString('id-ID')}`;
-        document.getElementById('emergency-fund').innerText = `Rp ${lifetimeEmergency.toLocaleString('id-ID')}`;
-
-        const cfElement = document.getElementById('cashflow');
-        cfElement.innerText = `${cashflowMonth >= 0 ? '+' : ''} Rp ${cashflowMonth.toLocaleString('id-ID')}`;
-        cfElement.className = `text-2xl font-black ${cashflowMonth >= 0 ? 'text-green-400' : 'text-red-400'}`;
-
-        // --- 4. UPDATE LIST ALOKASI ---
-        const allocationList = document.getElementById('allocation-list');
-        allocationList.innerHTML = '';
-        const totalSpentYear = Object.values(categoriesYear).reduce((a, b) => a + b, 0);
-        const sortedCats = Object.entries(categoriesYear).sort((a, b) => b[1] - a[1]);
-
-        sortedCats.forEach(([name, value]) => {
-            const percent = totalSpentYear > 0 ? ((value / totalSpentYear) * 100).toFixed(0) : 0;
-            let color = 'bg-slate-600';
-            if (name.toLowerCase().includes('aset') || name.toLowerCase().includes('inves')) color = 'bg-purple-500';
-            if (name.toLowerCase().includes('makan') || name.toLowerCase().includes('rokok')) color = 'bg-blue-500';
-
-            allocationList.innerHTML += `
+        list.innerHTML += `
+            <div class="bg-slate-800 p-4 rounded-lg flex justify-between">
                 <div>
-                    <div class="flex justify-between text-[9px] mb-2 uppercase font-black tracking-tighter text-slate-400">
-                        <span>${name}</span><span>${percent}%</span>
-                    </div>
-                    <div class="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
-                        <div class="${color} h-full transition-all duration-1000" style="width: ${percent}%"></div>
-                    </div>
-                </div>`;
-        });
+                    <p class="font-bold">${tx.kategori || "-"}</p>
+                    <p class="text-xs text-slate-400">${tx.date || "-"}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-blue-400 font-bold">Rp ${amt.toLocaleString('id-ID')}</p>
+                    <button onclick="hapus(${tx.id})" class="text-red-400 text-xs">hapus</button>
+                </div>
+            </div>
+        `;
+    });
 
-        // --- 5. RENDER ULANG CHART ---
-        renderChart(monthlyNetData);
-    }
+    document.getElementById("net-worth").innerText =
+        "Rp " + total.toLocaleString('id-ID');
+}
 
-    // Fungsi terpisah buat Chart biar rapi
-    function renderChart(dataPoints) {
-        const ctx = document.getElementById('dashboardChart').getContext('2d');
-        
-        // Hapus chart lama kalau ada (biar nggak tumpang tindih pas refresh)
-        if (window.myChart) {
-            window.myChart.destroy();
-        }
+// ➕ TAMBAH DATA DUMMY (TEST)
+async function addDummy() {
+    await saveTransactionToCloud({
+        amount: Math.floor(Math.random() * 100000),
+        kategori: "Test",
+        date: new Date().toISOString().split('T')[0]
+    });
 
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
-        gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+    renderDashboard();
+}
 
-        window.myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
-                datasets: [{
-                    data: dataPoints,
-                    borderColor: '#3b82f6',
-                    borderWidth: 3,
-                    pointRadius: 0,
-                    backgroundColor: gradient,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#475569', font: { size: 9 } } },
-                    x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 9 } } }
-                }
-            }
-        });
-    }
+// 🗑️ DELETE
+async function hapus(id) {
+    await deleteTransactionFromCloud(id);
+    renderDashboard();
+}
 
-    // Jalankan pas halaman beres loading
-    window.onload = renderDashboard;
+// 🚀 START APP
+window.onload = async () => {
+    const ok = await checkAuth();
+    if (!ok) return;
+
+    renderDashboard();
+};
 </script>
 
 </body>

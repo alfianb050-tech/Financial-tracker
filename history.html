@@ -6,19 +6,28 @@
     <title>Riwayat Transaksi | Bayu Alfianto</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/db.js"></script>
+    <script src="db.js"></script>
     <style>
-        /* Biar gak ketutup navigasi bawah di HP */
-        @media (max-width: 768px) {
-            main { padding-bottom: 120px !important; }
-        }
-        /* Custom Scrollbar */
+        @media (max-width: 768px) { main { padding-bottom: 120px !important; } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
     </style>
 </head>
 
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex">
+
+    <div id="loading-overlay">
+        <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-500"></div>
+    </div>
 
     <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400 sticky top-0 h-screen">
         <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic">Bayu Alfianto</h2>
@@ -29,7 +38,11 @@
                     <li><a href="index.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📊 Dashboard</a></li>
                     <li><a href="transaksi.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💸 Transaksi</a></li>
                     <li><a href="aset.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💎 Manajemen Aset</a></li>
+                    <li><a href="history.html" class="block px-3 py-2 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 font-bold">📜 Riwayat Lengkap</a></li>
                 </ul>
+            </div>
+            <div>
+                <button onclick="logoutUser()" class="w-full text-left px-3 py-2 text-red-500 hover:bg-red-500/10 rounded-lg transition uppercase text-[10px] font-bold">🚪 Logout</button>
             </div>
         </nav>
     </aside>
@@ -41,12 +54,8 @@
                     <h1 class="text-2xl font-bold tracking-tight text-white uppercase italic">Financial Archive</h1>
                     <p id="display-period" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Memuat...</p>
                 </div>
-                <div class="text-right hidden md:block">
-                    <span class="text-[10px] font-bold text-blue-500 border border-blue-500/30 px-3 py-1 rounded-full uppercase italic">Archive Mode</span>
-                </div>
+                <button onclick="logoutUser()" class="md:hidden text-red-500 text-[10px] font-bold border border-red-500/30 px-3 py-1 rounded-full uppercase">Exit</button>
             </div>
-
-            <div id="tabs-container"></div>
 
             <div class="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-800/50 p-4 rounded-2xl border border-slate-800">
                 <div class="flex gap-2 w-full md:w-auto">
@@ -81,7 +90,7 @@
                         </tr>
                     </thead>
                     <tbody id="historyBody" class="divide-y divide-slate-700/50">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -90,16 +99,12 @@
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950/80 backdrop-blur-lg border-t border-slate-800 px-6 py-4 z-50">
         <ul class="flex justify-around items-center">
             <li><a href="index.html" class="flex flex-col items-center gap-1 group text-slate-500">
-                <div class="p-2 rounded-xl group-hover:bg-slate-800"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></div>
+                <div class="p-2 rounded-xl group-hover:bg-slate-800 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></div>
                 <span class="text-[9px] font-black uppercase">Dash</span>
             </a></li>
             <li><a href="transaksi.html" class="flex flex-col items-center gap-1 group text-slate-500">
                 <div class="p-2 rounded-xl group-hover:bg-slate-800 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg></div>
                 <span class="text-[9px] font-black uppercase">Input</span>
-            </a></li>
-            <li><a href="aset.html" class="flex flex-col items-center gap-1 group text-slate-500">
-                <div class="p-2 rounded-xl group-hover:bg-slate-800 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
-                <span class="text-[9px] font-black uppercase">Asset</span>
             </a></li>
             <li><a href="history.html" class="flex flex-col items-center gap-1 group">
                 <div class="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-900/50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 2v-6m1 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
@@ -111,15 +116,18 @@
     <script>
         let currentTypeFilter = 'all';
 
-        // 1. Load Potongan Navigasi Tabs
-        async function loadTabs() {
-            try {
-                const resp = await fetch('top-tabs.html');
-                const html = await resp.text();
-                document.getElementById('tabs-container').innerHTML = html;
-                const oldScript = document.querySelector('#tabs-container script');
-                if (oldScript) eval(oldScript.innerHTML);
-            } catch (e) { console.error("Gagal load tabs:", e); }
+        // 1. SATPAM AUTH
+        async function checkAuth() {
+            const user = await getCurrentUser();
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                generateYearOptions();
+                const now = new Date();
+                document.getElementById('filter-month').value = String(now.getMonth() + 1).padStart(2, '0');
+                await renderHistory();
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
         }
 
         function generateYearOptions() {
@@ -177,6 +185,9 @@
                 const isNegative = tx.type === 'pengeluaran' || (tx.type === 'investasi' && tx.kategori === 'Beli Aset');
                 const colorClass = isNegative ? 'text-red-400' : 'text-green-400';
 
+                // Kolom Keterangan memakai field 'note' atau 'keterangan'
+                const note = tx.note || tx.keterangan || '-';
+
                 row.innerHTML = `
                     <td class="p-6 text-[10px] font-mono text-slate-500 font-bold">${tx.date}</td>
                     <td class="p-6">
@@ -187,7 +198,7 @@
                         </span>
                     </td>
                     <td class="p-6">
-                        <p class="text-xs font-bold text-slate-300">${tx.keterangan}</p>
+                        <p class="text-xs font-bold text-slate-300">${note}</p>
                         <p class="text-[8px] text-slate-600 mt-0.5 uppercase font-bold tracking-widest">${tx.unitCount > 0 ? tx.unitCount + ' ' + tx.unitType : ''}</p>
                     </td>
                     <td class="p-6 text-right font-black ${colorClass} text-xs">
@@ -218,13 +229,7 @@
             }
         }
 
-        window.onload = () => {
-            loadTabs();
-            generateYearOptions();
-            const now = new Date();
-            document.getElementById('filter-month').value = String(now.getMonth() + 1).padStart(2, '0');
-            renderHistory();
-        };
+        window.onload = checkAuth;
     </script>
 </body>
 </html>

@@ -6,12 +6,18 @@
     <title>Manajemen Aset | Bayu Alfianto</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="db.js"></script>
+    <script src="js/db.js"></script>
+    <style>
+        /* Biar konten gak ketutup Nav Bawah di HP */
+        @media (max-width: 768px) {
+            main { padding-bottom: 100px !important; }
+        }
+    </style>
 </head>
 
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex">
 
-    <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400">
+    <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400 sticky top-0 h-screen">
         <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic">Bayu Alfianto</h2>
         <nav class="space-y-8">
             <div>
@@ -33,67 +39,81 @@
         </nav>
     </aside>
 
-    <main class="flex-1 p-8">
-        <header class="mb-10">
+    <main class="flex-1 p-6 md:p-8">
+        <header class="mb-8 md:mb-10">
             <h1 class="text-2xl font-bold tracking-tight uppercase italic text-white">Brankas Aset</h1>
-            <p class="text-xs text-slate-500 font-bold tracking-[0.2em]">Net Worth & Portfolio Allocation</p>
+            <p class="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase">Net Worth & Portfolio Allocation</p>
         </header>
 
-        <div class="mb-10 p-8 bg-gradient-to-br from-blue-600 to-blue-900 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+        <div class="mb-8 p-6 md:p-8 bg-gradient-to-br from-blue-600 to-blue-900 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
             <div class="relative z-10">
-                <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mb-2 italic">Total Kekayaan Terakumulasi (Cash + Assets)</p>
-                <h2 id="total-wealth" class="text-4xl font-black italic text-white">Rp 0</h2>
-                <div id="wealth-summary" class="mt-4 text-[10px] text-blue-200 font-bold uppercase tracking-tighter">
+                <p class="text-[9px] font-bold text-blue-100 uppercase tracking-widest mb-1 italic">Total Kekayaan Terakumulasi</p>
+                <h2 id="total-wealth" class="text-3xl md:text-4xl font-black italic text-white">Rp 0</h2>
+                <div id="wealth-summary" class="mt-4 text-[9px] text-blue-200 font-bold uppercase tracking-tighter">
                     Menghubungi Server Singapura...
                 </div>
             </div>
-            <div class="absolute -right-10 -bottom-10 text-9xl opacity-10 italic font-black text-white uppercase">Asset</div>
+            <div class="absolute -right-6 -bottom-6 text-7xl md:text-9xl opacity-10 italic font-black text-white uppercase select-none">Asset</div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-xl">
-                <div class="flex justify-between items-start mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+            <div class="bg-slate-800 p-6 md:p-8 rounded-[2.5rem] border border-slate-700 shadow-xl">
+                <div class="flex justify-between items-start mb-6 md:mb-8">
                     <div>
-                        <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 italic">🛡️ Dana Darurat</h3>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase">Safe Haven Reserve</p>
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400 italic">🛡️ Dana Darurat</h3>
+                        <p class="text-[9px] text-slate-500 font-bold uppercase">Safe Haven Reserve</p>
                     </div>
-                    <span id="emergency-porsi-tag" class="text-[10px] font-mono font-bold text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">0% Portofolio</span>
+                    <span id="emergency-porsi-tag" class="text-[9px] font-mono font-bold text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full">0% Portofolio</span>
                 </div>
                 
-                <div class="mb-6">
-                    <p id="emergency-amount" class="text-3xl font-black mb-2 text-white">Rp 0</p>
+                <div class="mb-2">
+                    <p id="emergency-amount" class="text-2xl md:text-3xl font-black mb-3 text-white">Rp 0</p>
                     <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
                         <div id="bar-emergency" class="bg-blue-500 h-full w-[0%] shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-1000"></div>
                     </div>
-                    <div class="flex justify-between mt-3 text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+                    <div class="flex justify-between mt-3 text-[9px] font-bold text-slate-500 uppercase tracking-tighter">
                         <span id="emergency-progress">Progress Target: 0%</span>
                         <span>Target: 10jt</span>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-xl flex flex-col">
-                <div class="flex justify-between items-start mb-8">
-                    <div>
-                        <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 italic">📈 Investasi Aktif</h3>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase">Crypto, Saham, & Logam Mulia</p>
-                    </div>
+            <div class="bg-slate-800 p-6 md:p-8 rounded-[2.5rem] border border-slate-700 shadow-xl flex flex-col">
+                <div class="mb-6 md:mb-8">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400 italic">📈 Investasi Aktif</h3>
+                    <p class="text-[9px] text-slate-500 font-bold uppercase">Crypto, Saham, & Logam Mulia</p>
                 </div>
-                <div id="active-investments" class="space-y-4">
+                <div id="active-investments" class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scroll">
                     </div>
             </div>
         </div>
     </main>
 
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950/80 backdrop-blur-lg border-t border-slate-800 px-6 py-4 z-50">
+        <ul class="flex justify-around items-center">
+            <li><a href="index.html" class="flex flex-col items-center gap-1 group text-slate-500">
+                <div class="p-2 rounded-xl group-hover:bg-slate-800"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></div>
+                <span class="text-[9px] font-black uppercase">Dash</span>
+            </a></li>
+            <li><a href="transaksi.html" class="flex flex-col items-center gap-1 group text-slate-500">
+                <div class="p-2 rounded-xl group-hover:bg-slate-800"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg></div>
+                <span class="text-[9px] font-black uppercase">Input</span>
+            </a></li>
+            <li><a href="aset.html" class="flex flex-col items-center gap-1 group">
+                <div class="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-900/50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                <span class="text-[9px] font-black uppercase text-blue-500">Asset</span>
+            </a></li>
+            <li><a href="history.html" class="flex flex-col items-center gap-1 group text-slate-500">
+                <div class="p-2 rounded-xl group-hover:bg-slate-800 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 2v-6m1 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
+                <span class="text-[9px] font-black uppercase">Report</span>
+            </a></li>
+        </ul>
+    </nav>
+
     <script>
-    /**
-     * FUNGSI UTAMA: MENGAMBIL DATA DARI SUPABASE (via db.js) & UPDATE UI
-     */
     async function updateAsetPage() {
         try {
-            // 1. Ambil data pake fungsi global yang udah kita bikin di db.js
             const transactions = await window.getTransactions();
-
             const wealthDisplay = document.getElementById('total-wealth');
             const emergencyDisplay = document.getElementById('emergency-amount');
             const emergencyBar = document.getElementById('bar-emergency');
@@ -107,24 +127,20 @@
             let assetMap = {};
             let totalModalAset = 0;
 
-            // 2. LOGIKA PERHITUNGAN
             transactions.forEach(tx => {
                 const amt = parseFloat(tx.amount) || 0;
                 const unitQty = parseFloat(tx.unitCount) || 0;
                 
-                // Hitung Saldo Kas
                 if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') {
                     cashBalance += amt;
                 } else {
                     cashBalance -= amt;
                 }
 
-                // Hitung Dana Darurat
                 if (tx.kategori.toLowerCase().includes('darurat')) {
                     emergencyVal += amt;
                 }
 
-                // Hitung Investasi
                 if (tx.type === 'investasi') {
                     const key = tx.keterangan.toUpperCase();
                     if (!assetMap[key]) {
@@ -143,7 +159,6 @@
                 }
             });
 
-            // 3. UPDATE TAMPILAN TOTAL
             const totalNetWorth = cashBalance + totalModalAset;
             const toIDR = (num) => `Rp ${num.toLocaleString('id-ID')}`;
 
@@ -155,31 +170,25 @@
                 wealthSummary.innerText = `Cash: ${cashPercent}% | Assets: ${assetPercent}%`;
             }
 
-            // 4. UPDATE DANA DARURAT
             if (emergencyDisplay) {
                 emergencyDisplay.innerText = toIDR(emergencyVal);
                 const target = 10000000; 
                 const progressPercent = Math.min((emergencyVal / target) * 100, 100);
-                
                 if (emergencyBar) emergencyBar.style.width = progressPercent + '%';
                 if (emergencyProgress) emergencyProgress.innerText = `Progress Target: ${progressPercent.toFixed(0)}%`;
-                
                 const porsiEmergency = totalNetWorth > 0 ? ((emergencyVal / totalNetWorth) * 100).toFixed(1) : 0;
                 if (porsiTagEmergency) porsiTagEmergency.innerText = `${porsiEmergency}% Portofolio`;
             }
 
-            // 5. RENDER LIST INVESTASI
             if (investContainer) {
                 investContainer.innerHTML = '';
                 const assets = Object.entries(assetMap);
-
                 if (assets.length === 0) {
                     investContainer.innerHTML = `<p class="text-[10px] text-slate-600 italic text-center py-10 uppercase">Belum ada portofolio aktif</p>`;
                 } else {
                     assets.sort((a, b) => b[1].modal - a[1].modal);
                     assets.forEach(([name, data]) => {
                         if (data.unit <= 0) return;
-
                         const porsiAset = totalNetWorth > 0 ? ((data.modal / totalNetWorth) * 100).toFixed(1) : 0;
                         let color = 'text-purple-400';
                         let barColor = 'bg-purple-500';
@@ -190,7 +199,7 @@
                         else if (['USDT', 'BTC', 'CRYPTO'].includes(unitTag)) { color = 'text-orange-400'; barColor = 'bg-orange-500'; }
 
                         investContainer.innerHTML += `
-                            <div class="p-4 bg-slate-900/40 rounded-2xl border border-slate-700/50 hover:border-slate-600 transition-all group">
+                            <div class="p-4 bg-slate-900/40 rounded-2xl border border-slate-700/50 hover:border-slate-600 transition-all">
                                 <div class="flex justify-between items-center mb-1">
                                     <span class="text-[10px] font-black ${color} uppercase tracking-widest">${name}</span>
                                     <span class="text-[9px] font-bold text-slate-500">${porsiAset}% PORSI</span>
@@ -215,8 +224,6 @@
             console.error("Critical Error Aset:", err);
         }
     }
-
-    // Jalankan saat halaman dibuka
     window.onload = updateAsetPage;
     </script>
 </body>

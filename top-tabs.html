@@ -1,0 +1,27 @@
+<div class="flex bg-slate-950/50 p-1.5 rounded-2xl border border-slate-800 mb-8 shadow-inner overflow-hidden">
+    <a href="history.html" id="tab-history" class="flex-1 py-3 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl text-center transition-all duration-300 text-slate-500">
+        Riwayat
+    </a>
+    <a href="bulanan.html" id="tab-bulanan" class="flex-1 py-3 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl text-center transition-all duration-300 text-slate-500">
+        Bulanan
+    </a>
+    <a href="tahunan.html" id="tab-tahunan" class="flex-1 py-3 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl text-center transition-all duration-300 text-slate-500">
+        Tahunan
+    </a>
+</div>
+
+<script>
+    // Langsung script-nya tanpa perlu dibungkus lagi
+    (function() {
+        const currentPath = window.location.pathname;
+        const activeClass = "bg-blue-600 text-white shadow-lg shadow-blue-900/40";
+        
+        if (currentPath.includes('history.html')) {
+            document.getElementById('tab-history').className += " " + activeClass;
+        } else if (currentPath.includes('bulanan.html')) {
+            document.getElementById('tab-bulanan').className += " " + activeClass;
+        } else if (currentPath.includes('tahunan.html')) {
+            document.getElementById('tab-tahunan').className += " " + activeClass;
+        }
+    })();
+</script>

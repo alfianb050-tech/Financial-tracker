@@ -85,9 +85,6 @@ window.deleteTransactionFromCloud = async function(id) {
         console.error('Gagal hapus:', err);
         return false;
     }
-// };DATA
-
-
 
 window.getTransactions = async function() {
     try {

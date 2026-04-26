@@ -1,175 +1,270 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Bayu Alfianto</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="db.js"></script>
-    <style>
-        @media (max-width: 768px) { main { padding-bottom: 100px !important; } }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-        #loading-overlay { position: fixed; inset: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 9999; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Bayu Alfianto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="db.js"></script>
+    <style>
+        /* Biar konten gak ketutup Nav Bawah di HP */
+        @media (max-width: 768px) {
+            main { padding-bottom: 100px !important; }
+        }
+        /* Custom scrollbar biar makin pro */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+
+        /* Loading Screen Overlay */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+    </style>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3b82f6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
+
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex">
 
-    <div id="loading-overlay">
-        <div class="flex flex-col items-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-            <p class="text-[10px] uppercase tracking-widest text-slate-500">Authenticating...</p>
-        </div>
-    </div>
+    <div id="loading-overlay">
+        <div class="flex flex-col items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+            <p class="text-[10px] uppercase tracking-widest text-slate-500">Authenticating...</p>
+        </div>
+    </div>
 
-    <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400 sticky top-0 h-screen">
-        <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic">Bayu Alfianto</h2>
-        <nav class="space-y-8">
-            <div>
-                <p class="text-[10px] text-slate-500 font-bold mb-4 px-3 tracking-widest uppercase">Utama</p>
-                <ul class="space-y-2">
-                    <li><a href="index.html" class="block px-3 py-2 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 font-bold">📊 Dashboard</a></li>
-                    <li><a href="transaksi.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💸 Transaksi</a></li>
-                    <li><a href="aset.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💎 Manajemen Aset</a></li>
-                </ul>
-            </div>
-            <div>
-                <p class="text-[10px] text-slate-500 font-bold mb-4 px-3 tracking-widest uppercase">Sistem</p>
-                <ul class="space-y-2">
-                    <li><button onclick="logoutUser()" class="w-full text-left px-3 py-2 rounded-lg text-red-500 hover:bg-red-500/10 transition font-bold italic">🚪 Exit System</button></li>
-                </ul>
-            </div>
-        </nav>
-    </aside>
+    <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400 sticky top-0 h-screen">
+        <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic">Bayu Alfianto</h2>
+        <nav class="space-y-8">
+            <div>
+                <p class="text-[10px] text-slate-500 font-bold mb-4 px-3 tracking-widest uppercase">Utama</p>
+                <ul class="space-y-2">
+                    <li><a href="index.html" class="block px-3 py-2 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 font-bold">📊 Dashboard</a></li>
+                    <li><a href="transaksi.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💸 Transaksi</a></li>
+                    <li><a href="aset.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💎 Manajemen Aset</a></li>
+                </ul>
+            </div>
+            <div>
+                <p class="text-[10px] text-slate-500 font-bold mb-4 px-3 tracking-widest uppercase">Laporan</p>
+                <ul class="space-y-2">
+                    <li><a href="history.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📜 Riwayat Lengkap</a></li>
+                    <li><a href="bulanan.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📅 Laporan Bulanan</a></li>
+                    <li><button onclick="logoutUser()" class="w-full text-left px-3 py-2 rounded-lg text-red-500 hover:bg-red-500/10 transition">🚪 Logout</button></li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
 
-    <main class="flex-1 p-6 md:p-12">
-        <header class="mb-10 flex justify-between items-end">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight text-white italic uppercase">Operational Command</h1>
-                <p id="current-date-display" class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em]">Memuat...</p>
-            </div>
-            <span class="text-[10px] font-bold text-blue-500 border border-blue-500/30 px-3 py-1 rounded-full uppercase italic">Wild Mindset v3.0</span>
-        </header>
+    <main class="flex-1 p-6 md:p-12">
+        <header class="mb-10 flex justify-between items-end">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white italic uppercase">Operational Command</h1>
+                <p id="current-date-display" class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em]">Memuat Waktu...</p>
+            </div>
+            <div class="text-right">
+                <span class="text-[10px] font-bold text-blue-500 border border-blue-500/30 px-3 py-1 rounded-full uppercase italic">Wild Mindset v3.0</span>
+            </div>
+        </header>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-            <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-[2rem] shadow-xl">
-                <p class="text-blue-100 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Net Worth</p>
-                <h3 id="net-worth" class="text-2xl font-black text-white italic">Rp 0</h3>
-            </div>
-            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-lg">
-                <p class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Liquid Cash</p>
-                <h3 id="liquid-cash" class="text-2xl font-black text-blue-400">Rp 0</h3>
-            </div>
-            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-lg">
-                <p id="label-cashflow" class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Cashflow</p>
-                <h3 id="cashflow" class="text-2xl font-black">Rp 0</h3>
-            </div>
-            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-lg">
-                <p class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Emergency Fund</p>
-                <h3 id="emergency-fund" class="text-2xl font-black text-orange-500">Rp 0</h3>
-            </div>
-        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10">
+            <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-[2rem] shadow-xl">
+                <p class="text-blue-100 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Net Worth (Total)</p>
+                <h3 id="net-worth" class="text-2xl font-black text-white italic">Rp 0</h3>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-lg">
+                <p class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Liquid Cash</p>
+                <h3 id="liquid-cash" class="text-2xl font-black text-blue-400">Rp 0</h3>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-lg">
+                <p id="label-cashflow" class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Cashflow</p>
+                <h3 id="cashflow" class="text-2xl font-black">Rp 0</h3>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-lg">
+                <p class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1 italic">Emergency Fund</p>
+                <h3 id="emergency-fund" class="text-2xl font-black text-orange-500">Rp 0</h3>
+            </div>
+        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 bg-slate-800 p-6 md:p-10 rounded-[3rem] border border-slate-700 shadow-2xl">
-                <p id="chart-title" class="text-slate-400 font-bold italic uppercase tracking-[0.2em] text-[10px] mb-8">Performa Tahunan</p>
-                <div class="h-[300px] w-full"><canvas id="dashboardChart"></canvas></div>
-            </div>
-            <div class="bg-slate-800 p-8 md:p-10 rounded-[3rem] border border-slate-700 shadow-2xl">
-                <h3 class="text-[10px] font-bold mb-10 text-slate-500 uppercase tracking-[0.2em] italic text-center">Distribusi Pengeluaran</h3>
-                <div id="allocation-list" class="space-y-8"></div>
-            </div>
-        </div>
-    </main>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 bg-slate-800 p-6 md:p-10 rounded-[3rem] border border-slate-700 min-h-[350px] flex flex-col shadow-2xl">
+                <div class="flex justify-between items-center mb-8">
+                    <p id="chart-title" class="text-slate-400 font-bold italic uppercase tracking-[0.2em] text-[10px]">Performa Tahunan</p>
+                </div>
+                <div class="w-full flex-1 relative">
+                    <canvas id="dashboardChart"></canvas>
+                </div>
+            </div>
 
-    <script>
-        async function checkAuth() {
-            try {
-                const user = await getCurrentUser();
-                if (!user) { window.location.href = 'login.html'; return; }
-                await renderDashboard();
-                const loader = document.getElementById('loading-overlay');
-                loader.style.transition = 'opacity 0.5s ease';
-                loader.style.opacity = '0';
-                setTimeout(() => loader.style.display = 'none', 500);
-            } catch (err) { window.location.href = 'login.html'; }
-        }
+            <div class="bg-slate-800 p-8 md:p-10 rounded-[3rem] border border-slate-700 shadow-2xl">
+                <h3 class="text-[10px] font-bold mb-10 text-slate-500 uppercase tracking-[0.2em] italic text-center">Distribusi Pengeluaran</h3>
+                <div id="allocation-list" class="space-y-8"></div>
+            </div>
+        </div>
+    </main>
 
-        async function renderDashboard() {
-            const txs = await getTransactions(); 
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth() + 1;
-            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            
-            document.getElementById('current-date-display').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('label-cashflow').innerText = `Cashflow (${monthNames[currentMonth-1]})`;
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950/80 backdrop-blur-lg border-t border-slate-800 px-6 py-4 z-50">
+        <ul class="flex justify-around items-center">
+            <li><a href="index.html" class="flex flex-col items-center gap-1 group">
+                <div class="p-2 rounded-xl bg-blue-600 text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></div>
+                <span class="text-[9px] font-black uppercase text-blue-500">Dash</span>
+            </a></li>
+            <li><a href="aset.html" class="flex flex-col items-center gap-1 group text-slate-500">
+                <div class="p-2 rounded-xl group-hover:bg-slate-800 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                <span class="text-[9px] font-black uppercase">Asset</span>
+            </a></li>
+            <li><button onclick="logoutUser()" class="flex flex-col items-center gap-1 text-red-500">
+                <div class="p-2 rounded-xl bg-red-500/10"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></div>
+                <span class="text-[9px] font-black uppercase">Exit</span>
+            </button></li>
+        </ul>
+    </nav>
 
-            let totalIn = 0, totalOut = 0, modalAset = 0, emergency = 0, monthlyCF = 0;
-            let categoriesYear = {}; 
-            const monthlyNetData = new Array(12).fill(0);
+    <script>
+        // 1. FUNGSI CEK AUTH (Satpam)
+        async function checkAuth() {
+            try {
+                const user = await getCurrentUser();
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Jika user ada, baru render dashboard
+                await renderDashboard();
+                
+                // Hilangkan loading overlay dengan animasi
+                const loader = document.getElementById('loading-overlay');
+                loader.style.transition = 'opacity 0.5s ease';
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+                
+            } catch (err) {
+                console.error("Auth error:", err);
+                window.location.href = 'login.html';
+            }
+        }
 
-            txs.forEach(tx => {
-                const amt = parseInt(tx.amount) || 0;
-                let y, m;
-                if (tx.date.includes('-')) {
-                    const p = tx.date.split('-'); y = parseInt(p[0]); m = parseInt(p[1]);
-                } else {
-                    const p = tx.date.split('/'); m = parseInt(p[1]); y = parseInt(p[2]);
-                }
+        // 2. FUNGSI RENDER DASHBOARD
+        async function renderDashboard() {
+            if (typeof getTransactions !== 'function') {
+                console.error("Gagal memanggil getTransactions dari db.js");
+                return;
+            }
 
-                if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') totalIn += amt;
-                else totalOut += amt;
+            const txs = await getTransactions(); 
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1;
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            
+            document.getElementById('label-cashflow').innerText = `Cashflow (${monthNames[currentMonth-1]})`;
+            document.getElementById('chart-title').innerText = `Performa Tahunan ${currentYear}`;
+            document.getElementById('current-date-display').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-                if (tx.type === 'investasi') modalAset += (tx.kategori === 'Beli Aset' ? amt : -amt);
-                if (tx.kategori?.toLowerCase().includes('darurat')) emergency += amt;
+            let totalIn_Lifetime = 0, totalOut_Lifetime = 0, totalModalAset_Active = 0, lifetimeEmergency = 0, cashflowMonth = 0;
+            let categoriesYear = {}; 
+            const monthlyNetData = new Array(12).fill(0);
 
-                if (y === currentYear) {
-                    monthlyNetData[m - 1] += (tx.type === 'pemasukan' ? amt : -amt);
-                    if (m === currentMonth) monthlyCF += (tx.type === 'pemasukan' ? amt : -amt);
-                    if (tx.type !== 'pemasukan') categoriesYear[tx.kategori] = (categoriesYear[tx.kategori] || 0) + amt;
-                }
-            });
+            if (txs && txs.length > 0) {
+                txs.forEach(tx => {
+                    const amt = parseInt(tx.amount);
+                    const [d, m, y] = tx.date.split('/');
+                    const txMonth = parseInt(m), txYear = parseInt(y);
 
-            document.getElementById('net-worth').innerText = `Rp ${(totalIn - totalOut + modalAset).toLocaleString('id-ID')}`;
-            document.getElementById('liquid-cash').innerText = `Rp ${(totalIn - totalOut).toLocaleString('id-ID')}`;
-            document.getElementById('emergency-fund').innerText = `Rp ${emergency.toLocaleString('id-ID')}`;
-            
-            const cf = document.getElementById('cashflow');
-            cf.innerText = `${monthlyCF >= 0 ? '+' : ''} Rp ${monthlyCF.toLocaleString('id-ID')}`;
-            cf.className = `text-2xl font-black ${monthlyCF >= 0 ? 'text-green-400' : 'text-red-400'}`;
+                    if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') totalIn_Lifetime += amt;
+                    else totalOut_Lifetime += amt;
 
-            // Allocation List Render
-            const allocationList = document.getElementById('allocation-list');
-            allocationList.innerHTML = '';
-            const totalSpentYear = Object.values(categoriesYear).reduce((a, b) => a + b, 0);
-            Object.entries(categoriesYear).sort((a,b) => b[1]-a[1]).forEach(([name, val]) => {
-                const p = totalSpentYear > 0 ? ((val/totalSpentYear)*100).toFixed(0) : 0;
-                allocationList.innerHTML += `<div><div class="flex justify-between text-[9px] mb-2 uppercase font-black text-slate-400"><span>${name}</span><span>${p}%</span></div><div class="w-full bg-slate-900 h-1 rounded-full"><div class="bg-blue-500 h-full" style="width: ${p}%"></div></div></div>`;
-            });
+                    if (tx.type === 'investasi') {
+                        if (tx.kategori === 'Beli Aset') totalModalAset_Active += amt;
+                        else totalModalAset_Active -= amt;
+                    }
 
-            renderChart(monthlyNetData);
-        }
+                    if (tx.kategori.toLowerCase().includes('darurat')) lifetimeEmergency += amt;
 
-        function renderChart(dataPoints) {
-            const ctx = document.getElementById('dashboardChart').getContext('2d');
-            if (window.myChart) window.myChart.destroy();
-            window.myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
-                    datasets: [{
-                        data: dataPoints, borderColor: '#3b82f6', borderWidth: 3, pointRadius: 0, backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#475569', font: { size: 9 } } }, x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 9 } } } } }
-            });
-        }
+                    if (txMonth === currentMonth && txYear === currentYear) {
+                        cashflowMonth += (tx.type === 'pemasukan') ? amt : -amt;
+                    }
 
-        window.onload = checkAuth;
-    </script>
+                    if (txYear === currentYear) {
+                        monthlyNetData[txMonth - 1] += (tx.type === 'pemasukan') ? amt : -amt;
+                        if (tx.type !== 'pemasukan') {
+                            categoriesYear[tx.kategori] = (categoriesYear[tx.kategori] || 0) + amt;
+                        }
+                    }
+                });
+            }
+
+            const liquidCash = totalIn_Lifetime - totalOut_Lifetime;
+            document.getElementById('net-worth').innerText = `Rp ${(liquidCash + totalModalAset_Active).toLocaleString('id-ID')}`;
+            document.getElementById('liquid-cash').innerText = `Rp ${liquidCash.toLocaleString('id-ID')}`;
+            document.getElementById('emergency-fund').innerText = `Rp ${lifetimeEmergency.toLocaleString('id-ID')}`;
+
+            const cfElement = document.getElementById('cashflow');
+            cfElement.innerText = `${cashflowMonth >= 0 ? '+' : ''} Rp ${cashflowMonth.toLocaleString('id-ID')}`;
+            cfElement.className = `text-2xl font-black ${cashflowMonth >= 0 ? 'text-green-400' : 'text-red-400'}`;
+
+            const allocationList = document.getElementById('allocation-list');
+            allocationList.innerHTML = '';
+            const totalSpentYear = Object.values(categoriesYear).reduce((a, b) => a + b, 0);
+            Object.entries(categoriesYear).sort((a, b) => b[1] - a[1]).forEach(([name, value]) => {
+                const percent = totalSpentYear > 0 ? ((value / totalSpentYear) * 100).toFixed(0) : 0;
+                allocationList.innerHTML += `
+                    <div>
+                        <div class="flex justify-between text-[9px] mb-2 uppercase font-black tracking-tighter text-slate-400">
+                            <span>${name}</span><span>${percent}%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
+                            <div class="bg-blue-500 h-full transition-all duration-1000" style="width: ${percent}%"></div>
+                        </div>
+                    </div>`;
+            });
+
+            renderChart(monthlyNetData);
+        }
+
+        // 3. FUNGSI CHART
+        function renderChart(dataPoints) {
+            const ctx = document.getElementById('dashboardChart').getContext('2d');
+            if (window.myChart) window.myChart.destroy();
+            window.myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
+                    datasets: [{
+                        data: dataPoints,
+                        borderColor: '#3b82f6',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#475569', font: { size: 9 } } },
+                        x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 9 } } }
+                    }
+                }
+            });
+        }
+
+        // Jalankan Pengecekan saat halaman dibuka
+        window.onload = checkAuth;
+    </script>
 </body>
 </html>

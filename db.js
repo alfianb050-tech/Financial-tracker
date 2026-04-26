@@ -8,51 +8,24 @@ window._supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
  * --- AUTHENTICATION (NEW) ---
  */
 
-// Fungsi Login (Dipanggil dari login.html)
-window.loginUser = async function(email, password) {
-    try {
-        const { data, error } = await _supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-        });
-        if (error) throw error;
-        return data;
-    } catch (err) {
-        console.error('Login Error:', err.message);
-        throw err;
-    }
-};
-
-// Fungsi Logout (Dipanggil dari mana aja)
-window.logoutUser = async function() {
-    try {
-        const { error } = await _supabase.auth.signOut();
-        if (error) throw error;
-        window.location.href = 'login.html';
-    } catch (err) {
-        console.error('Logout Error:', err.message);
-    }
-};
-
-// Fungsi Cek User (Penting buat Satpam di index.html)
-window.getCurrentUser = async function() {
-    const { data: { user } } = await _supabase.auth.getUser();
-    return user;
-};
-
 /**
- * --- DATA FUNCTIONS (Existing) ---
+ * --- DATA FUNCTIONS (REVISED) ---
  */
 
 window.getTransactions = async function() {
     try {
+        // Cek user dulu sebelum tarik data
+        const user = await window.getCurrentUser();
+        if (!user) return [];
+
         const { data, error } = await _supabase
             .from('transactions')
             .select('*')
+            .eq('user_id', user.id) // Filter manual biar makin rapi (opsional kalau RLS sudah nyala)
             .order('id', { ascending: false });
 
         if (error) {
-            console.error('Error tarik data:', error);
+            console.error('Error tarik data:', error.message);
             return [];
         }
         return data;
@@ -64,13 +37,28 @@ window.getTransactions = async function() {
 
 window.saveTransactionToCloud = async function(newTx) {
     try {
+        // 1. Ambil ID user yang sedang login
+        const user = await window.getCurrentUser();
+        
+        if (!user) {
+            alert("Sesi habis, silakan login ulang.");
+            return null;
+        }
+
+        // 2. Suntik user_id ke dalam data yang akan disimpan
+        // Ini kuncinya supaya RLS nggak nolak (Bug Fix)
+        const dataToSave = {
+            ...newTx,
+            user_id: user.id 
+        };
+
         const { data, error } = await _supabase
             .from('transactions')
-            .insert([newTx])
+            .insert([dataToSave])
             .select();
 
         if (error) {
-            console.error('Error simpan data:', error);
+            console.error('Error simpan data:', error.message);
             return null;
         }
         return data;
@@ -82,10 +70,14 @@ window.saveTransactionToCloud = async function(newTx) {
 
 window.deleteTransactionFromCloud = async function(id) {
     try {
+        const user = await window.getCurrentUser();
+        if (!user) return false;
+
         const { error } = await _supabase
             .from('transactions')
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .eq('user_id', user.id); // Pastikan cuma bisa hapus data milik sendiri
 
         if (error) throw error;
         return true;

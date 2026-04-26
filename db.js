@@ -86,3 +86,57 @@ window.deleteTransactionFromCloud = async function(id) {
         return false;
     }
 };
+
+* --- DATA FUNCTIONS (Existing) ---
+ */
+
+window.getTransactions = async function() {
+    try {
+        const { data, error } = await _supabase
+            .from('transactions')
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (error) {
+            console.error('Error tarik data:', error);
+            return [];
+        }
+        return data;
+    } catch (err) {
+        console.error('Koneksi terputus:', err);
+        return [];
+    }
+};
+
+window.saveTransactionToCloud = async function(newTx) {
+    try {
+        const { data, error } = await _supabase
+            .from('transactions')
+            .insert([newTx])
+            .select();
+
+        if (error) {
+            console.error('Error simpan data:', error);
+            return null;
+        }
+        return data;
+    } catch (err) {
+        console.error('Gagal kirim ke Cloud:', err);
+        return null;
+    }
+};
+
+window.deleteTransactionFromCloud = async function(id) {
+    try {
+        const { error } = await _supabase
+            .from('transactions')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+        return true;
+    } catch (err) {
+        console.error('Gagal hapus:', err);
+        return false;
+    }
+};

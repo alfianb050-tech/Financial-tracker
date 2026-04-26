@@ -9,16 +9,16 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="db.js"></script>
     <style>
-        /* Biar gak ketutup navigasi bawah di HP */
         @media (max-width: 768px) {
             main { padding-bottom: 120px !important; }
         }
+        select option { background: #0f172a; }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex">
 
     <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400 sticky top-0 h-screen">
-        <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic">Bayu Alfianto</h2>
+        <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic text-center">Bayu Alfianto</h2>
         <nav class="space-y-8">
             <div>
                 <p class="text-[10px] font-bold mb-4 px-3 tracking-widest uppercase text-slate-500">Utama</p>
@@ -45,7 +45,7 @@
                     <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
                     <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
                 </select>
-                <select id="select-year" onchange="renderMonthly()" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold outline-none text-white transition focus:border-blue-500">
+                <select id="select-year" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold outline-none text-white transition focus:border-blue-500">
                 </select>
             </div>
         </header>
@@ -91,22 +91,10 @@
 
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950/80 backdrop-blur-lg border-t border-slate-800 px-6 py-4 z-50">
         <ul class="flex justify-around items-center">
-            <li><a href="index.html" class="flex flex-col items-center gap-1 group text-slate-500">
-                <div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></div>
-                <span class="text-[9px] font-black uppercase">Dash</span>
-            </a></li>
-            <li><a href="transaksi.html" class="flex flex-col items-center gap-1 group text-slate-500">
-                <div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg></div>
-                <span class="text-[9px] font-black uppercase">Input</span>
-            </a></li>
-            <li><a href="aset.html" class="flex flex-col items-center gap-1 group text-slate-500">
-                <div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
-                <span class="text-[9px] font-black uppercase">Asset</span>
-            </a></li>
-            <li><a href="history.html" class="flex flex-col items-center gap-1 group">
-                <div class="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-900/50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 2v-6m1 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
-                <span class="text-[9px] font-black uppercase text-blue-500">Report</span>
-            </a></li>
+            <li><a href="index.html" class="flex flex-col items-center gap-1 group text-slate-500"><div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase">Dash</span></a></li>
+            <li><a href="transaksi.html" class="flex flex-col items-center gap-1 group text-slate-500"><div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase">Input</span></a></li>
+            <li><a href="aset.html" class="flex flex-col items-center gap-1 group text-slate-500"><div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase">Asset</span></a></li>
+            <li><a href="history.html" class="flex flex-col items-center gap-1 group"><div class="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-900/50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 2v-6m1 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase text-blue-500">Report</span></a></li>
         </ul>
     </nav>
 
@@ -114,32 +102,40 @@
     let chartIn = null;
     let chartOut = null;
 
-    // 1. Fungsi panggil Top Tabs
     async function loadTabs() {
         try {
             const resp = await fetch('top-tabs.html');
             const html = await resp.text();
             document.getElementById('tabs-container').innerHTML = html;
-            const oldScript = document.querySelector('#tabs-container script');
-            if (oldScript) eval(oldScript.innerHTML);
         } catch (e) { console.error("Gagal load tabs:", e); }
     }
 
-    function generateYears() {
+    // Logic Sliding Window 3 Tahun
+    function generateYearOptions(selectedYear) {
         const selectYear = document.getElementById('select-year');
         if (!selectYear) return;
-        const currentYear = new Date().getFullYear();
-        for (let y = 2024; y <= currentYear + 1; y++) {
+        
+        let startYear = Math.max(2024, selectedYear - 1);
+        let endYear = startYear + 2; 
+
+        selectYear.innerHTML = ''; 
+
+        for (let y = startYear; y <= endYear; y++) {
             const opt = document.createElement('option');
-            opt.value = y; opt.text = y;
-            if (y === currentYear) opt.selected = true;
+            opt.value = y;
+            opt.text = `Tahun ${y}`;
+            if (y === selectedYear) opt.selected = true;
             selectYear.appendChild(opt);
         }
     }
 
     async function renderMonthly() {
-        const targetMonth = parseInt(document.getElementById('select-month').value);
-        const targetYear = parseInt(document.getElementById('select-year').value);
+        const monthEl = document.getElementById('select-month');
+        const yearEl = document.getElementById('select-year');
+        if (!monthEl.value || !yearEl.value) return;
+
+        const targetMonth = parseInt(monthEl.value);
+        const targetYear = parseInt(yearEl.value);
         
         const dummyDate = new Date(targetYear, targetMonth - 1);
         document.getElementById('display-month').innerText = dummyDate.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
@@ -176,10 +172,10 @@
             document.getElementById('total-outflow').innerText = toIDR(outflow);
             document.getElementById('total-invest').innerText = toIDR(invest);
 
-            const net = inflow - (outflow + invest); 
+            const net = inflow - (outflow); // Outflow sudah mencakup investasi dalam map
             const insightText = document.getElementById('insight-text');
-            if (inflow > 0 || outflow > 0 || invest > 0) {
-                insightText.innerHTML = `Sisa saldo bulan ini: <b>${toIDR(net)}</b>. <br> ${net > 0 ? '🔥 Cashflow positif, amankan aset!' : '⚠️ Cashflow negatif, perketat ikat pinggang!'}`;
+            if (inflow > 0 || outflow > 0) {
+                insightText.innerHTML = `Sisa saldo bulan ini: <b>${toIDR(inflow - outflow)}</b>. <br> ${ (inflow - outflow) > 0 ? '🔥 Cashflow positif, amankan aset!' : '⚠️ Cashflow negatif, perketat ikat pinggang!'}`;
             } else {
                 insightText.innerText = "Belum ada data untuk periode ini.";
             }
@@ -226,11 +222,28 @@
         else chartOut = newChart;
     }
 
-    window.onload = () => {
-        loadTabs();
-        generateYears();
+    window.onload = async () => {
+        // Satpam: Cek login
+       
+        await loadTabs();
+        
         const now = new Date();
+        const currentYear = now.getFullYear();
+
+        // Inisialisasi dropdown tahun
+        generateYearOptions(currentYear);
+        
+        // Set bulan sekarang
         document.getElementById('select-month').value = now.getMonth() + 1;
+
+        // Pendengar dropdown tahun
+        const selectYear = document.getElementById('select-year');
+        selectYear.addEventListener('change', function() {
+            const picked = parseInt(this.value);
+            generateYearOptions(picked);
+            renderMonthly();
+        });
+
         renderMonthly();
     };
     </script>

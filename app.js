@@ -1,63 +1,51 @@
-let transactions = JSON.parse(localStorage.getItem('bayu_tx')) || [];
+/**
+ * APP.JS - HELPER MODE (SINKRON SUPABASE)
+ * Taruh fungsi-fungsi bantuan di sini biar bisa dipake di semua halaman.
+ */
 
-function saveTransaction(data) {
-    // Tambah ID unik dan Tanggal otomatis
-    const newTx = {
-        id: Date.now(),
-        date: new Date().toLocaleDateString('id-ID'),
-        ...data
-    };
-
-    transactions.push(newTx);
-    localStorage.setItem('bayu_tx', JSON.stringify(transactions));
-    alert("Data Berhasil Disimpan di Memori!");
-}
-
-function calculateTotals() {
-    let inflow = 0;
-    let outflow = 0;
-    let investment = 0;
-
-    transactions.forEach(tx => {
-        if (tx.type === 'pemasukan') inflow += parseFloat(tx.amount);
-        if (tx.type === 'pengeluaran') outflow += parseFloat(tx.amount);
-        if (tx.type === 'investasi') investment += parseFloat(tx.amount);
-    });
-
-    return {
-        inflow,
-        outflow,
-        investment,
-        netWorth: inflow - outflow 
-    };
-}
-
-
-function formatIDR(number) {
+// 1. Helper Format Rupiah (Biar tampilan konsisten)
+window.formatIDR = (number) => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
         maximumFractionDigits: 0
-    }).format(number);
-}
+    }).format(number || 0);
+};
 
+// 2. Helper Hitung Ringkasan Aset (Data diambil dari hasil fetch Supabase)
+window.calculateAssetSummary = (transactions) => {
+    let summary = {
+        totalInflow: 0,
+        totalOutflow: 0,
+        totalInvest: 0,
+        netBalance: 0,
+        assets: {}
+    };
 
-function getAssetSummary() {
-    let assets = {};
-    
-    transactions.filter(tx => tx.type === 'investasi').forEach(tx => {
-        if (!assets[tx.keterangan]) {
-            assets[tx.keterangan] = { unit: 0, totalModal: 0, unitType: tx.unitType };
-        }
+    transactions.forEach(tx => {
+        const amt = parseFloat(tx.amount) || 0;
         
-        if (tx.kategori === 'Beli Aset') {
-            assets[tx.keterangan].unit += parseFloat(tx.unitCount);
-            assets[tx.keterangan].totalModal += parseFloat(tx.amount);
-        } else {
-            assets[tx.keterangan].unit -= parseFloat(tx.unitCount);
-            assets[tx.keterangan].totalModal -= parseFloat(tx.amount);
+        if (tx.type === 'pemasukan') {
+            summary.totalInflow += amt;
+        } else if (tx.type === 'pengeluaran') {
+            summary.totalOutflow += amt;
+        } else if (tx.type === 'investasi') {
+            summary.totalInvest += amt;
+            // Logika Aset
+            const key = tx.note || tx.keterangan || "ASET LAIN";
+            if (!summary.assets[key]) {
+                summary.assets[key] = { unit: 0, modal: 0 };
+            }
+            if (tx.kategori === 'Beli Aset') {
+                summary.assets[key].unit += parseFloat(tx.unitCount || 0);
+                summary.assets[key].modal += amt;
+            } else {
+                summary.assets[key].unit -= parseFloat(tx.unitCount || 0);
+                summary.assets[key].modal -= amt;
+            }
         }
     });
-    
-    return assets;
-}
+
+    summary.netBalance = summary.totalInflow - summary.totalOutflow - summary.totalInvest;
+    return summary;
+};

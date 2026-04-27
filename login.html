@@ -3,19 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Bayu Alfianto</title>
+    <title>Login | Wild Mindset</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <script src="db.js"></script>
+    <script src="js/db.js"></script>
 
     <style>
-        body {
-            background-color: #0f172a; 
-            color: #f8fafc;
-        }
+        body { background-color: #0f172a; color: #f8fafc; }
         .glass-card {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
@@ -23,7 +18,7 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen p-4">
 
     <div class="w-full max-w-md p-8 glass-card rounded-2xl shadow-2xl">
         <div class="text-center mb-8">
@@ -31,32 +26,31 @@
                 <i class="fas fa-shield-alt text-2xl text-white"></i>
             </div>
             <h1 class="text-2xl font-bold tracking-tight text-white uppercase italic">Secure Access</h1>
-            <p class="text-slate-400 text-sm mt-2 font-bold uppercase tracking-tighter text-[10px]">Wild Mindset Command Center</p>
+            <p class="text-slate-400 text-[10px] mt-2 font-bold uppercase tracking-tighter">Wild Mindset Command Center</p>
         </div>
 
         <form id="loginForm" class="space-y-6">
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Email Address</label>
                 <input type="email" id="email" required
-                    class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-white"
+                    class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-white transition-all"
                     placeholder="nama@email.com">
             </div>
 
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Password</label>
                 <input type="password" id="password" required
-                    class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-white"
+                    class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-white transition-all"
                     placeholder="••••••••">
             </div>
 
             <button type="submit" id="btnLogin"
-                class="w-full py-4 px-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-lg shadow-lg transform transition-active active:scale-95 duration-200 uppercase tracking-widest italic text-xs">
+                class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-lg shadow-lg active:scale-95 transition-all duration-200 uppercase tracking-widest italic text-xs">
                 Sign In
             </button>
         </form>
 
-        <div id="errorMessage" class="hidden mt-4 p-3 bg-red-500/20 border border-red-500/50 text-red-400 text-[10px] font-bold text-center rounded-lg uppercase italic">
-        </div>
+        <div id="errorMessage" class="hidden mt-4 p-3 bg-red-500/20 border border-red-500/50 text-red-400 text-[10px] font-bold text-center rounded-lg uppercase italic"></div>
 
         <footer class="mt-8 text-center">
             <p class="text-slate-500 text-[8px] uppercase tracking-[0.3em] font-black">Sync with Singapore Server 🛡️☁️</p>
@@ -64,31 +58,32 @@
     </div>
 
     <script>
-        // PAKAI SCRIPT BIASA (BUKAN MODULE)
         const loginForm = document.getElementById('loginForm');
         const errorMessage = document.getElementById('errorMessage');
         const btnLogin = document.getElementById('btnLogin');
+
+        // Proteksi: Jika sudah login, tendang ke index
+        async function checkAuth() {
+            const user = await window.getCurrentUser();
+            if (user) window.location.href = 'index.html';
+        }
+        checkAuth();
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            // Loading state
             btnLogin.innerText = 'AUTHENTICATING...';
             btnLogin.disabled = true;
             errorMessage.classList.add('hidden');
 
             try {
-                // Manggil fungsi global dari db.js
                 const data = await window.loginUser(email, password);
-                
                 if (data && data.user) {
-                    // Login Berhasil
                     window.location.href = 'index.html'; 
                 }
             } catch (error) {
-                // Login Gagal
                 errorMessage.innerText = 'ACCESS DENIED: ' + error.message;
                 errorMessage.classList.remove('hidden');
                 btnLogin.innerText = 'SIGN IN';

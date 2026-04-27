@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Transaksi | Bayu Alfianto</title>
+    <title>Riwayat Transaksi | Asset Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="apple-touch-icon" href="gambar1.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="db.js"></script>
@@ -15,13 +19,24 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         select option { background: #0f172a; }
+        
+        /* Style buat Tab yang Aktif */
+        .tab-active {
+            background-color: #3b82f6 !important;
+            color: white !important;
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
     </style>
 </head>
 
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex">
 
     <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400 sticky top-0 h-screen">
-        <h2 class="text-xl font-bold mb-10 tracking-tighter text-blue-500 uppercase italic">Bayu Alfianto</h2>
+        <div class="flex flex-col items-center mb-10 pb-6 border-b border-slate-800">
+            <img src="gambar1.png" alt="Logo" class="w-16 h-16 mb-4 rounded-2xl shadow-[0_0_20px_rgba(59,130,246,0.2)] border border-slate-700">
+            <img src="gambar2.png" alt="Asset Tracker" class="h-5 w-auto">
+        </div>
         <nav class="space-y-8">
             <div>
                 <p class="text-[10px] font-bold mb-4 px-3 tracking-widest uppercase text-slate-500">Utama</p>
@@ -32,55 +47,70 @@
                 </ul>
             </div>
         </nav>
+        <div class="absolute bottom-10 left-6 right-6">
+            <button onclick="handleLogout()" class="w-full py-3 bg-red-900/10 border border-red-500/30 text-red-500 rounded-xl text-[10px] font-black uppercase italic tracking-widest hover:bg-red-500 hover:text-white transition-all">
+                Exit System
+            </button>
+        </div>
     </aside>
 
     <main class="flex-1 p-6 md:p-8 max-w-5xl mx-auto w-full">
         <header class="flex flex-col gap-4 mb-8">
-            <div class="flex justify-between items-end">
-                <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-white uppercase italic">Financial Archive</h1>
-                    <p id="display-period" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Memuat...</p>
+            <div class="flex justify-between items-start md:items-end gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="md:hidden">
+                        <img src="gambar1.png" alt="Logo" class="w-12 h-12 rounded-2xl shadow-lg border border-slate-800">
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-black tracking-tight text-white uppercase italic leading-none">Financial Archive</h1>
+                        <p id="display-period" class="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] mt-1">Initializing...</p>
+                    </div>
                 </div>
-                <div class="text-right hidden md:block">
-                    <span class="text-[10px] font-bold text-blue-500 border border-blue-500/30 px-3 py-1 rounded-full uppercase italic">Archive Mode</span>
-                </div>
+                
+                <button onclick="handleLogout()" class="md:hidden p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </button>
             </div>
 
-            <div id="tabs-container"></div>
+            <div id="tabs-container" class="flex gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800 w-full overflow-x-auto">
+                <a href="history.html" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase italic tracking-widest rounded-xl transition-all tab-active">History</a>
+                <a href="bulanan.html" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase italic tracking-widest rounded-xl transition-all text-slate-500 hover:bg-slate-900">Monthly</a>
+                <a href="tahunan.html" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase italic tracking-widest rounded-xl transition-all text-slate-500 hover:bg-slate-900">Yearly</a>
+            </div>
 
-            <div class="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-800/50 p-4 rounded-2xl border border-slate-800">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-800/50 p-4 rounded-2xl border border-slate-800 shadow-lg">
                 <div class="flex gap-2 w-full md:w-auto">
-                    <select id="filter-month" onchange="renderHistory()" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-blue-500">
+                    <select id="filter-month" onchange="renderHistory()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-[10px] font-black uppercase text-white outline-none focus:border-blue-500 italic">
                         <option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option>
                         <option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option>
                         <option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option>
                         <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
                     </select>
-                    <select id="select-year" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-blue-500"></select>
+                    <select id="select-year" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-[10px] font-black uppercase text-white outline-none focus:border-blue-500 italic"></select>
                 </div>
 
-                <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-700 w-full md:w-auto overflow-x-auto">
-                    <button onclick="applyTypeFilter('all', this)" class="type-btn flex-1 md:flex-none px-4 py-2 text-[9px] font-black uppercase rounded-lg bg-slate-700 text-white transition-all">ALL</button>
-                    <button onclick="applyTypeFilter('pemasukan', this)" class="type-btn flex-1 md:flex-none px-4 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 transition-all">IN</button>
-                    <button onclick="applyTypeFilter('pengeluaran', this)" class="type-btn flex-1 md:flex-none px-4 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 transition-all">OUT</button>
-                    <button onclick="applyTypeFilter('investasi', this)" class="type-btn flex-1 md:flex-none px-4 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 transition-all">INVEST</button>
+                <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 w-full md:w-auto overflow-x-auto">
+                    <button onclick="applyTypeFilter('all', this)" class="type-btn flex-1 md:flex-none px-5 py-2 text-[9px] font-black uppercase rounded-lg bg-slate-800 text-white border border-slate-700 transition-all italic">ALL</button>
+                    <button onclick="applyTypeFilter('pemasukan', this)" class="type-btn flex-1 md:flex-none px-5 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 transition-all italic">IN</button>
+                    <button onclick="applyTypeFilter('pengeluaran', this)" class="type-btn flex-1 md:flex-none px-5 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 transition-all italic">OUT</button>
+                    <button onclick="applyTypeFilter('investasi', this)" class="type-btn flex-1 md:flex-none px-5 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 transition-all italic">INVEST</button>
                 </div>
             </div>
         </header>
 
-        <div class="bg-slate-800 rounded-[2rem] border border-slate-700 overflow-hidden shadow-2xl">
+        <div class="bg-slate-800 rounded-[2.5rem] border border-slate-700 overflow-hidden shadow-2xl">
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[600px]">
-                    <thead class="bg-slate-900 text-slate-500 border-b border-slate-700">
+                <table class="w-full text-left border-collapse min-w-[700px]">
+                    <thead class="bg-slate-950 text-slate-500 border-b border-slate-800">
                         <tr>
-                            <th class="p-6 text-[10px] font-bold uppercase tracking-widest">Tanggal</th>
-                            <th class="p-6 text-[10px] font-bold uppercase tracking-widest">Kategori</th>
-                            <th class="p-6 text-[10px] font-bold uppercase tracking-widest">Keterangan</th>
-                            <th class="p-6 text-[10px] font-bold uppercase tracking-widest text-right">Nominal</th>
-                            <th class="p-6 text-[10px] font-bold uppercase tracking-widest text-center">Aksi</th>
+                            <th class="p-6 text-[9px] font-black uppercase tracking-[0.2em] italic">Date</th>
+                            <th class="p-6 text-[9px] font-black uppercase tracking-[0.2em] italic">Category</th>
+                            <th class="p-6 text-[9px] font-black uppercase tracking-[0.2em] italic">Note</th>
+                            <th class="p-6 text-[9px] font-black uppercase tracking-[0.2em] italic text-right">Amount</th>
+                            <th class="p-6 text-[9px] font-black uppercase tracking-[0.2em] italic text-center">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="historyBody" class="divide-y divide-slate-700/50"></tbody>
+                    <tbody id="historyBody" class="divide-y divide-slate-800/50"></tbody>
                 </table>
             </div>
         </div>
@@ -88,38 +118,40 @@
 
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950/80 backdrop-blur-lg border-t border-slate-800 px-6 py-4 z-50">
         <ul class="flex justify-around items-center">
-            <li><a href="index.html" class="flex flex-col items-center gap-1 group text-slate-500"><div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase">Dash</span></a></li>
-            <li><a href="transaksi.html" class="flex flex-col items-center gap-1 group text-slate-500"><div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase">Input</span></a></li>
-            <li><a href="aset.html" class="flex flex-col items-center gap-1 group text-slate-500"><div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase">Asset</span></a></li>
-            <li><a href="history.html" class="flex flex-col items-center gap-1 group"><div class="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-900/50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 2v-6m1 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase text-blue-500">Report</span></a></li>
+            <li><a href="index.html" class="flex flex-col items-center gap-1 group text-slate-500"><div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase italic">Dash</span></a></li>
+            <li><a href="transaksi.html" class="flex flex-col items-center gap-1 group text-slate-500"><div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase italic">Input</span></a></li>
+            <li><a href="aset.html" class="flex flex-col items-center gap-1 group text-slate-500"><div class="p-2 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase italic">Asset</span></a></li>
+            <li><a href="history.html" class="flex flex-col items-center gap-1 group"><div class="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-500/20"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 2v-6m1 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2"></path></svg></div><span class="text-[9px] font-black uppercase text-blue-500 italic">Report</span></a></li>
         </ul>
     </nav>
 
     <script>
         let currentTypeFilter = 'all';
 
-        async function loadTabs() {
+        async function securityCheck() {
             try {
-                const resp = await fetch('top-tabs.html');
-                const html = await resp.text();
-                document.getElementById('tabs-container').innerHTML = html;
-            } catch (e) { console.error("Gagal load tabs:", e); }
+                const user = await window.getCurrentUser();
+                if (!user) { window.location.href = 'login.html'; }
+            } catch (err) { window.location.href = 'login.html'; }
         }
 
-        // --- LOGIC SLIDING WINDOW 3 TAHUN ---
+        async function handleLogout() {
+            if (confirm("Terminate Session?")) {
+                await window.logoutUser();
+                window.location.href = 'login.html';
+            }
+        }
+
         function generateYearOptions(selectedYear) {
             const selectYear = document.getElementById('select-year');
             if (!selectYear) return;
-            
             let startYear = Math.max(2024, selectedYear - 1);
             let endYear = startYear + 2; 
-
             selectYear.innerHTML = ''; 
-
             for (let y = startYear; y <= endYear; y++) {
                 const opt = document.createElement('option');
                 opt.value = y;
-                opt.text = `Tahun ${y}`;
+                opt.text = `TAHUN ${y}`;
                 if (y === selectedYear) opt.selected = true;
                 selectYear.appendChild(opt);
             }
@@ -128,22 +160,24 @@
         async function renderHistory() {
             const historyBody = document.getElementById('historyBody');
             const targetMonth = document.getElementById('filter-month').value;
-            const targetYear = document.getElementById('select-year').value; // Menggunakan select-year
+            const targetYear = document.getElementById('select-year').value;
             const displayPeriod = document.getElementById('display-period');
             
             const monthName = document.getElementById('filter-month').options[document.getElementById('filter-month').selectedIndex].text;
             displayPeriod.innerText = `Arsip: ${monthName} ${targetYear}`;
 
-            historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-[10px] text-slate-500 uppercase tracking-widest animate-pulse">Menarik data dari Singapura...</td></tr>';
+            historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-[9px] text-slate-500 uppercase tracking-widest animate-pulse italic font-black">Syncing Encrypted Logs...</td></tr>';
 
             try {
                 const transactions = await window.getTransactions(); 
                 
                 let filtered = transactions.filter(tx => {
-                    const parts = tx.date.split('/');
-                    const m = parts[1].padStart(2, '0');
-                    const y = parts[2];
-                    return m === targetMonth && y === targetYear;
+                    const separator = tx.date.includes('/') ? '/' : '-';
+                    const parts = tx.date.split(separator);
+                    let txYear, txMonth;
+                    if (parts[0].length === 4) { [txYear, txMonth] = [parts[0], parts[1]]; }
+                    else { [txYear, txMonth] = [parts[2], parts[1]]; }
+                    return txMonth.padStart(2, '0') === targetMonth && txYear.toString() === targetYear.toString();
                 });
 
                 if (currentTypeFilter !== 'all') {
@@ -151,92 +185,79 @@
                 }
 
                 filtered.sort((a, b) => {
-                    const dateA = new Date(a.date.split('/').reverse().join('-'));
-                    const dateB = new Date(b.date.split('/').reverse().join('-'));
+                    const dateA = new Date(a.date.split(a.date.includes('/')?'/':'-').reverse().join('-'));
+                    const dateB = new Date(b.date.split(b.date.includes('/')?'/':'-').reverse().join('-'));
                     return dateB - dateA;
                 });
 
                 historyBody.innerHTML = '';
 
                 if (filtered.length === 0) {
-                    historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-[10px] text-slate-600 italic uppercase tracking-widest font-bold">Gak ada histori di periode ini, Bay.</td></tr>';
+                    historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-[10px] text-slate-600 italic uppercase tracking-widest font-black">No transaction logs found for this period.</td></tr>';
                     return;
                 }
 
                 filtered.forEach((tx) => {
                     const row = document.createElement('tr');
-                    row.className = "hover:bg-slate-900/30 transition-all group";
+                    row.className = "hover:bg-slate-900/40 transition-all group border-b border-slate-800/30";
                     const isNegative = tx.type === 'pengeluaran' || (tx.type === 'investasi' && tx.kategori === 'Beli Aset');
                     const colorClass = isNegative ? 'text-red-400' : 'text-green-400';
 
                     row.innerHTML = `
-                        <td class="p-6 text-[10px] font-mono text-slate-500 font-bold">${tx.date}</td>
+                        <td class="p-6 text-[10px] font-mono text-slate-500 font-bold italic">${tx.date}</td>
                         <td class="p-6">
-                            <span class="text-[8px] font-black px-2 py-1 rounded-lg border border-slate-700 uppercase tracking-tighter
+                            <span class="text-[8px] font-black px-2 py-1 rounded-lg border uppercase italic tracking-tighter
                             ${tx.type === 'investasi' ? 'text-purple-400 bg-purple-500/10 border-purple-500/20' : 
                               tx.type === 'pemasukan' ? 'text-blue-400 bg-blue-500/10 border-blue-500/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}">
                                 ${tx.kategori}
                             </span>
                         </td>
                         <td class="p-6">
-                            <p class="text-xs font-bold text-slate-300">${tx.keterangan}</p>
-                            <p class="text-[8px] text-slate-600 mt-0.5 uppercase font-bold tracking-widest">${tx.unitCount > 0 ? tx.unitCount + ' ' + tx.unitType : ''}</p>
+                            <p class="text-xs font-bold text-slate-300 italic">${tx.keterangan || tx.note || '-'}</p>
+                            <p class="text-[8px] text-slate-600 mt-1 uppercase font-black tracking-widest italic">${tx.unitCount > 0 ? tx.unitCount + ' ' + tx.unitType : ''}</p>
                         </td>
-                        <td class="p-6 text-right font-black ${colorClass} text-xs">
-                            ${isNegative ? '-' : '+'} Rp ${parseInt(tx.amount).toLocaleString('id-ID')}
+                        <td class="p-6 text-right font-black ${colorClass} text-xs italic tracking-tighter">
+                            ${isNegative ? '-' : '+'} Rp ${parseFloat(tx.amount).toLocaleString('id-ID')}
                         </td>
                         <td class="p-6 text-center">
-                            <button onclick="hapusData(${tx.id})" class="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-red-500 transition-all text-[9px] font-black uppercase border border-slate-800 px-3 py-1 rounded-lg">Hapus</button>
+                            <button onclick="hapusData(${tx.id})" class="opacity-0 group-hover:opacity-100 text-red-500/50 hover:text-red-500 transition-all text-[9px] font-black uppercase border border-red-500/20 px-3 py-1.5 rounded-xl italic">Delete</button>
                         </td>
                     `;
                     historyBody.appendChild(row);
                 });
             } catch (err) {
-                console.error("Error history:", err);
-                historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-red-500 font-bold uppercase">Gagal memuat data.</td></tr>';
+                historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-red-500 font-black uppercase italic">Critical: Link Failed.</td></tr>';
             }
         }
 
         function applyTypeFilter(type, btn) {
             currentTypeFilter = type;
             document.querySelectorAll('.type-btn').forEach(b => {
-                b.classList.remove('bg-slate-700', 'text-white');
+                b.classList.remove('bg-slate-800', 'text-white', 'border-slate-700');
                 b.classList.add('text-slate-500');
             });
-            btn.classList.add('bg-slate-700', 'text-white');
+            btn.classList.add('bg-slate-800', 'text-white', 'border-slate-700');
             renderHistory();
         }
 
         async function hapusData(id) {
-            if (confirm('Hapus selamanya dari Cloud, Bay?')) {
+            if (confirm('Permanently delete this record?')) {
                 const success = await window.deleteTransactionFromCloud(id);
                 if (success) { renderHistory(); }
             }
         }
 
         window.onload = async () => {
-            // SATPAM: Cek login
-            
-
-            await loadTabs();
-            
+            await securityCheck();
             const now = new Date();
             const currentYear = now.getFullYear();
-            
-            // Set bulan sekarang
             document.getElementById('filter-month').value = String(now.getMonth() + 1).padStart(2, '0');
-            
-            // Inisialisasi dropdown tahun sliding
             generateYearOptions(currentYear);
-            
             const selectYear = document.getElementById('select-year');
             selectYear.addEventListener('change', function() {
-                const picked = parseInt(this.value);
-                generateYearOptions(picked);
+                generateYearOptions(parseInt(this.value));
                 renderHistory();
             });
-
-            // Load data pertama kali
             renderHistory();
         };
     </script>

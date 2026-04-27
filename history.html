@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Transaksi | Asset Tracker</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3b82f6">
+    <title>Archive | Asset Tracker</title>
     <link rel="apple-touch-icon" href="gambar1.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,25 +11,13 @@
     <script src="db.js"></script>
     <script src="app.js"></script>
     <style>
-        @media (max-width: 768px) {
-            main { padding-bottom: 120px !important; }
-        }
+        @media (max-width: 768px) { main { padding-bottom: 120px !important; } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         select option { background: #0f172a; }
+        .tab-active { background-color: #3b82f6 !important; color: white !important; border-color: #3b82f6 !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
         
-        .tab-active {
-            background-color: #3b82f6 !important;
-            color: white !important;
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-        }
-
-        /* Animasi Toast */
-        @keyframes slideDown {
-            from { transform: translate(-50%, -100%); opacity: 0; }
-            to { transform: translate(-50%, 20px); opacity: 1; }
-        }
+        @keyframes slideDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 20px); opacity: 1; } }
         .toast-animate { animation: slideDown 0.4s ease forwards; }
     </style>
 </head>
@@ -41,51 +27,52 @@
     <div id="custom-toast" class="fixed top-0 left-1/2 -translate-x-1/2 z-[10000] hidden toast-animate">
         <div id="toast-bg" class="bg-blue-600 text-white px-8 py-4 rounded-2xl shadow-xl border border-blue-400/50 flex items-center gap-3">
             <span id="toast-icon">🛡️</span>
-            <span id="toast-text" class="text-[10px] font-black uppercase italic tracking-[0.2em]">Action Completed</span>
+            <span id="toast-text" class="text-[10px] font-black uppercase italic tracking-widest">Success</span>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="fixed inset-0 z-[10001] bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-6">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl text-center">
+            <h3 class="text-xs font-black uppercase italic text-white mb-2">Terminate Record?</h3>
+            <p class="text-[10px] text-slate-400 uppercase font-bold mb-8 leading-relaxed">Data akan dihapus permanen dari sistem cloud.</p>
+            <div class="flex gap-3">
+                <button id="cancel-delete" class="flex-1 py-4 bg-slate-700 rounded-2xl text-[10px] font-black uppercase italic">Cancel</button>
+                <button id="confirm-delete" class="flex-1 py-4 bg-red-600 rounded-2xl text-[10px] font-black uppercase italic shadow-lg shadow-red-900/50">Delete</button>
+            </div>
         </div>
     </div>
 
     <aside class="w-64 border-r border-slate-800 p-6 hidden md:block text-slate-400 sticky top-0 h-screen">
         <div class="flex flex-col items-center mb-10 pb-6 border-b border-slate-800">
-            <img src="gambar1.png" alt="Logo" class="w-16 h-16 mb-4 rounded-2xl shadow-[0_0_20px_rgba(59,130,246,0.2)] border border-slate-700">
-            <img src="gambar2.png" alt="Asset Tracker" class="h-5 w-auto">
+            <img src="gambar1.png" class="w-16 h-16 mb-4 rounded-2xl shadow-lg border border-slate-700">
+            <img src="gambar2.png" class="h-5 w-auto">
         </div>
-        <nav class="space-y-8">
-            <ul class="space-y-2 text-xs font-bold italic">
-                <li><a href="index.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">📊 Dashboard</a></li>
-                <li><a href="transaksi.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💸 Transaksi</a></li>
-                <li><a href="aset.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition">💎 Manajemen Aset</a></li>
-            </ul>
+        <nav class="space-y-4">
+            <a href="index.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition text-xs italic">📊 Dashboard</a>
+            <a href="transaksi.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition text-xs italic">💸 Transaksi</a>
+            <a href="aset.html" class="block px-3 py-2 rounded-lg hover:bg-slate-800 transition text-xs italic">💎 Manajemen Aset</a>
         </nav>
-        <div class="absolute bottom-10 left-6 right-6">
-            <button onclick="handleLogout()" class="w-full py-3 bg-red-900/10 border border-red-500/20 text-red-500 rounded-xl text-[10px] font-black uppercase italic tracking-widest hover:bg-red-500 hover:text-white transition-all">
-                Exit System
-            </button>
-        </div>
     </aside>
 
     <main class="flex-1 p-6 md:p-8 max-w-5xl mx-auto w-full">
         <header class="flex flex-col gap-4 mb-8">
-            <div class="flex justify-between items-start md:items-end gap-4">
+            <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div class="md:hidden">
-                        <img src="gambar1.png" alt="Logo" class="w-12 h-12 rounded-2xl shadow-lg border border-slate-800">
-                    </div>
+                    <img src="gambar1.png" class="w-12 h-12 rounded-2xl border border-slate-800 md:hidden">
                     <div>
-                        <h1 class="text-xl md:text-2xl font-black tracking-tight text-white uppercase italic leading-none">Financial Archive</h1>
-                        <p id="display-period" class="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] mt-1">Initializing...</p>
+                        <h1 class="text-xl md:text-2xl font-black text-white uppercase italic leading-none">Financial Archive</h1>
+                        <p id="display-period" class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Initializing...</p>
                     </div>
                 </div>
-                
-                <button onclick="handleLogout()" class="md:hidden p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl">
+                <button onclick="handleLogout()" class="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl md:hidden active:scale-95 transition-all">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 </button>
             </div>
 
-            <div id="tabs-container" class="flex gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800 w-full overflow-x-auto">
-                <a href="history.html" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase italic tracking-widest rounded-xl transition-all tab-active">History</a>
-                <a href="bulanan.html" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase italic tracking-widest rounded-xl transition-all text-slate-500 hover:bg-slate-900">Monthly</a>
-                <a href="tahunan.html" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase italic tracking-widest rounded-xl transition-all text-slate-500 hover:bg-slate-900">Yearly</a>
+            <div id="tabs-container" class="flex gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+                <a href="history.html" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase italic rounded-xl tab-active">History</a>
+                <a href="bulanan.html" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase italic rounded-xl text-slate-500">Monthly</a>
+                <a href="tahunan.html" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase italic rounded-xl text-slate-500">Yearly</a>
             </div>
 
             <div class="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-800/50 p-4 rounded-2xl border border-slate-800 shadow-lg">
@@ -96,14 +83,7 @@
                         <option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option>
                         <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
                     </select>
-                    <select id="select-year" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-[10px] font-black uppercase text-white outline-none focus:border-blue-500 italic"></select>
-                </div>
-
-                <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 w-full md:w-auto overflow-x-auto">
-                    <button onclick="applyTypeFilter('all', this)" class="type-btn flex-1 md:flex-none px-5 py-2 text-[9px] font-black uppercase rounded-lg bg-slate-800 text-white border border-slate-700 transition-all italic">ALL</button>
-                    <button onclick="applyTypeFilter('pemasukan', this)" class="type-btn flex-1 md:flex-none px-5 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 transition-all italic">IN</button>
-                    <button onclick="applyTypeFilter('pengeluaran', this)" class="type-btn flex-1 md:flex-none px-5 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 transition-all italic">OUT</button>
-                    <button onclick="applyTypeFilter('investasi', this)" class="type-btn flex-1 md:flex-none px-5 py-2 text-[9px] font-black uppercase rounded-lg text-slate-500 transition-all italic">INVEST</button>
+                    <select id="select-year" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-[10px] font-black uppercase text-white outline-none italic"></select>
                 </div>
             </div>
         </header>
@@ -113,11 +93,11 @@
                 <table class="w-full text-left border-collapse min-w-[700px]">
                     <thead class="bg-slate-950 text-slate-500 border-b border-slate-800">
                         <tr>
-                            <th class="p-6 text-[9px] font-black uppercase tracking-[0.2em] italic">Date</th>
-                            <th class="p-6 text-[9px] font-black uppercase tracking-[0.2em] italic">Category</th>
-                            <th class="p-6 text-[9px] font-black uppercase tracking-[0.2em] italic">Note</th>
-                            <th class="p-6 text-[9px] font-black uppercase tracking-[0.2em] italic text-right">Amount</th>
-                            <th class="p-6 text-[9px] font-black uppercase tracking-[0.2em] italic text-center">Action</th>
+                            <th class="p-6 text-[9px] font-black uppercase italic">Date</th>
+                            <th class="p-6 text-[9px] font-black uppercase italic">Category</th>
+                            <th class="p-6 text-[9px] font-black uppercase italic">Note</th>
+                            <th class="p-6 text-[9px] font-black uppercase italic text-right">Amount</th>
+                            <th class="p-6 text-[9px] font-black uppercase italic text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody id="historyBody" class="divide-y divide-slate-800/50"></tbody>
@@ -137,31 +117,25 @@
 
     <script>
         let currentTypeFilter = 'all';
+        let deleteTargetId = null;
 
-        // Fungsi Toast Custom (Biar Gak Ada Nama Github)
         function showToast(msg, isError = false) {
             const toast = document.getElementById('custom-toast');
-            const text = document.getElementById('toast-text');
-            const bg = document.getElementById('toast-bg');
-            const icon = document.getElementById('toast-icon');
-
-            text.innerText = msg;
-            icon.innerText = isError ? "⚠️" : "🛡️";
-            bg.className = isError ? "bg-red-600 text-white px-8 py-4 rounded-2xl shadow-xl border border-red-400/50 flex items-center gap-3" 
-                                   : "bg-blue-600 text-white px-8 py-4 rounded-2xl shadow-xl border border-blue-400/50 flex items-center gap-3";
-            
+            document.getElementById('toast-text').innerText = msg;
+            document.getElementById('toast-bg').className = isError ? "bg-red-600 text-white px-8 py-4 rounded-2xl shadow-xl border border-red-400/50 flex items-center gap-3" : "bg-blue-600 text-white px-8 py-4 rounded-2xl shadow-xl border border-blue-400/50 flex items-center gap-3";
             toast.classList.remove('hidden');
-            setTimeout(() => { toast.classList.add('hidden'); }, 3000);
+            setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 
         async function securityCheck() {
             try {
                 const user = await window.getCurrentUser();
-                if (!user) { window.location.href = 'login.html'; }
+                if (!user) window.location.href = 'login.html';
             } catch (err) { window.location.href = 'login.html'; }
         }
 
         async function handleLogout() {
+            // Confirm logout ganti modal sederhana biar gak ada domain github
             if (confirm("Terminate Session?")) {
                 await window.logoutUser();
                 window.location.href = 'login.html';
@@ -176,8 +150,7 @@
             selectYear.innerHTML = ''; 
             for (let y = startYear; y <= endYear; y++) {
                 const opt = document.createElement('option');
-                opt.value = y;
-                opt.text = `TAHUN ${y}`;
+                opt.value = y; opt.text = `FISCAL ${y}`;
                 if (y === selectedYear) opt.selected = true;
                 selectYear.appendChild(opt);
             }
@@ -187,110 +160,71 @@
             const historyBody = document.getElementById('historyBody');
             const targetMonth = document.getElementById('filter-month').value;
             const targetYear = document.getElementById('select-year').value;
-            const displayPeriod = document.getElementById('display-period');
             
-            const monthName = document.getElementById('filter-month').options[document.getElementById('filter-month').selectedIndex].text;
-            displayPeriod.innerText = `Arsip: ${monthName} ${targetYear}`;
-
-            historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-[9px] text-slate-500 uppercase tracking-widest animate-pulse italic font-black">Syncing Encrypted Logs...</td></tr>';
+            document.getElementById('display-period').innerText = `Period: ${targetMonth}/${targetYear}`;
+            historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-[9px] text-slate-500 uppercase tracking-widest animate-pulse italic font-black">Syncing...</td></tr>';
 
             try {
                 const transactions = await window.getTransactions(); 
-                
                 let filtered = transactions.filter(tx => {
-                    const separator = tx.date.includes('/') ? '/' : '-';
-                    const parts = tx.date.split(separator);
+                    const parts = tx.date.split(tx.date.includes('/')?'/':'-');
                     let txYear, txMonth;
                     if (parts[0].length === 4) { [txYear, txMonth] = [parts[0], parts[1]]; }
                     else { [txYear, txMonth] = [parts[2], parts[1]]; }
                     return txMonth.padStart(2, '0') === targetMonth && txYear.toString() === targetYear.toString();
                 });
 
-                if (currentTypeFilter !== 'all') {
-                    filtered = filtered.filter(tx => tx.type === currentTypeFilter);
-                }
-
-                filtered.sort((a, b) => {
-                    const dateA = new Date(a.date.split(a.date.includes('/')?'/':'-').reverse().join('-'));
-                    const dateB = new Date(b.date.split(b.date.includes('/')?'/':'-').reverse().join('-'));
-                    return dateB - dateA;
-                });
-
                 historyBody.innerHTML = '';
-
                 if (filtered.length === 0) {
-                    historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-[10px] text-slate-600 italic uppercase tracking-widest font-black">No transaction logs found.</td></tr>';
+                    historyBody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-[10px] text-slate-600 italic uppercase font-black">No Records.</td></tr>';
                     return;
                 }
 
-                filtered.forEach((tx) => {
+                filtered.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach((tx) => {
+                    const isNegative = tx.type === 'pengeluaran' || (tx.type === 'investasi' && tx.kategori === 'Beli Aset');
                     const row = document.createElement('tr');
                     row.className = "hover:bg-slate-900/40 transition-all group border-b border-slate-800/30";
-                    const isNegative = tx.type === 'pengeluaran' || (tx.type === 'investasi' && tx.kategori === 'Beli Aset');
-                    const colorClass = isNegative ? 'text-red-400' : 'text-green-400';
-
                     row.innerHTML = `
                         <td class="p-6 text-[10px] font-mono text-slate-500 font-bold italic">${tx.date}</td>
                         <td class="p-6">
-                            <span class="text-[8px] font-black px-2 py-1 rounded-lg border uppercase italic tracking-tighter
-                            ${tx.type === 'investasi' ? 'text-purple-400 bg-purple-500/10 border-purple-500/20' : 
-                              tx.type === 'pemasukan' ? 'text-blue-400 bg-blue-500/10 border-blue-500/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}">
-                                ${tx.kategori}
-                            </span>
+                            <span class="text-[8px] font-black px-2 py-1 rounded-lg border uppercase italic ${tx.type === 'investasi' ? 'text-purple-400 border-purple-500/20' : tx.type === 'pemasukan' ? 'text-blue-400 border-blue-500/20' : 'text-red-400 border-red-500/20'}">${tx.kategori}</span>
                         </td>
-                        <td class="p-6">
-                            <p class="text-xs font-bold text-slate-300 italic">${tx.keterangan || tx.note || '-'}</p>
-                            <p class="text-[8px] text-slate-600 mt-1 uppercase font-black tracking-widest italic">${tx.unitCount > 0 ? tx.unitCount + ' ' + tx.unitType : ''}</p>
-                        </td>
-                        <td class="p-6 text-right font-black ${colorClass} text-xs italic tracking-tighter">
-                            ${isNegative ? '-' : '+'} Rp ${parseFloat(tx.amount).toLocaleString('id-ID')}
-                        </td>
-                        <td class="p-6 text-center">
-                            <button onclick="hapusData(${tx.id})" class="opacity-0 group-hover:opacity-100 text-red-500/50 hover:text-red-500 transition-all text-[9px] font-black uppercase border border-red-500/20 px-3 py-1.5 rounded-xl italic">Delete</button>
-                        </td>
+                        <td class="p-6 text-xs font-bold text-slate-300 italic">${tx.note || '-'}</td>
+                        <td class="p-6 text-right font-black ${isNegative ? 'text-red-400' : 'text-green-400'} text-xs italic">Rp ${parseFloat(tx.amount).toLocaleString('id-ID')}</td>
+                        <td class="p-6 text-center"><button onclick="triggerDelete(${tx.id})" class="opacity-0 group-hover:opacity-100 text-red-500/50 hover:text-red-500 transition-all text-[9px] font-black uppercase italic">Delete</button></td>
                     `;
                     historyBody.appendChild(row);
                 });
-            } catch (err) {
-                showToast("System Error: Link Failed", true);
-            }
+            } catch (err) { showToast("Link Failed", true); }
         }
 
-        function applyTypeFilter(type, btn) {
-            currentTypeFilter = type;
-            document.querySelectorAll('.type-btn').forEach(b => {
-                b.classList.remove('bg-slate-800', 'text-white', 'border-slate-700');
-                b.classList.add('text-slate-500');
-            });
-            btn.classList.add('bg-slate-800', 'text-white', 'border-slate-700');
-            renderHistory();
+        // --- CUSTOM MODAL LOGIC (HILANGIN GITHUB DOMAIN) ---
+        function triggerDelete(id) {
+            deleteTargetId = id;
+            document.getElementById('confirm-modal').classList.remove('hidden');
         }
 
-        async function hapusData(id) {
-            // Confirm masih pake browser karena butuh input YES/NO, 
-            // tapi Alert suksesnya kita pake Custom Toast.
-            if (confirm('Permanently delete this record?')) {
-                const success = await window.deleteTransactionFromCloud(id);
-                if (success) { 
-                    showToast("Record Deleted Successfully");
-                    renderHistory(); 
-                } else {
-                    showToast("Error: Delete Failed", true);
+        document.getElementById('cancel-delete').onclick = () => {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            deleteTargetId = null;
+        };
+
+        document.getElementById('confirm-delete').onclick = async () => {
+            if (deleteTargetId) {
+                const success = await window.deleteTransactionFromCloud(deleteTargetId);
+                if (success) {
+                    showToast("Record Terminated");
+                    renderHistory();
                 }
+                document.getElementById('confirm-modal').classList.add('hidden');
             }
-        }
+        };
 
         window.onload = async () => {
             await securityCheck();
             const now = new Date();
-            const currentYear = now.getFullYear();
+            generateYearOptions(now.getFullYear());
             document.getElementById('filter-month').value = String(now.getMonth() + 1).padStart(2, '0');
-            generateYearOptions(currentYear);
-            const selectYear = document.getElementById('select-year');
-            selectYear.addEventListener('change', function() {
-                generateYearOptions(parseInt(this.value));
-                renderHistory();
-            });
             renderHistory();
         };
     </script>

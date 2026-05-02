@@ -139,7 +139,7 @@
         </ul>
     </nav>
 
-   <script>
+  <script>
         // GATEKEEPER: Cek Login
         async function securityCheck() {
             try {
@@ -172,15 +172,12 @@
             document.getElementById('label-cashflow').innerText = `Cashflow (${monthNames[currentMonth-1]})`;
             document.getElementById('current-date-display').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // Variabel Lifetime (Sepanjang Masa)
+            // Variabel Dasar (Versi Stabil Lo)
             let totalIn_Lifetime = 0;
             let totalOut_Lifetime = 0;
             let totalModalAset_Active = 0;
             let lifetimeEmergency = 0;
-            
-            // Variabel Cashflow (Bulan Berjalan)
-            let monthlyInflow = 0;
-            let monthlyOutflow = 0;
+            let cashflowMonth = 0;
 
             // Variabel Grafik & Alokasi (Lifetime)
             let incomeSourcesLifetime = {};
@@ -194,45 +191,44 @@
                     const parts = tx.date.split(separator);
                     
                     let txYear, txMonth;
-                    if (parts[0].length === 4) { // YYYY-MM-DD
+                    if (parts[0].length === 4) { 
                         txYear = parseInt(parts[0]); txMonth = parseInt(parts[1]);
-                    } else { // DD/MM/YYYY
+                    } else { 
                         txYear = parseInt(parts[2]); txMonth = parseInt(parts[1]);
                     }
 
                     // 1. HITUNG SALDO GLOBAL (LIFETIME)
                     if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') {
                         totalIn_Lifetime += amt;
-                        // Data untuk Grafik Doughnut (Hanya Pemasukan Murni)
                         if (tx.type === 'pemasukan') {
                             const kat = tx.kategori || 'Lain-lain';
                             incomeSourcesLifetime[kat] = (incomeSourcesLifetime[kat] || 0) + amt;
                         }
                     } else {
                         totalOut_Lifetime += amt;
-                        // Data untuk Alokasi Pengeluaran (Hanya Pengeluaran Murni)
-                        if (tx.type === 'pengeluaran') {
-                            const kat = tx.kategori || 'Lain-lain';
-                            expenseCategoriesLifetime[kat] = (expenseCategoriesLifetime[kat] || 0) + amt;
-                            totalSpentLifetime += amt;
-                        }
+                        // Masukkan semua kategori pengeluaran (Lifestyle, Aset, dll) ke Alokasi
+                        const kat = tx.kategori || 'Lain-lain';
+                        expenseCategoriesLifetime[kat] = (expenseCategoriesLifetime[kat] || 0) + amt;
+                        totalSpentLifetime += amt;
                     }
 
-                    // 2. HITUNG MODAL ASET AKTIF
+                    // 2. HITUNG MODAL ASET AKTIF (BRANKAS)
                     if (tx.type === 'investasi') {
                         if (tx.kategori === 'Beli Aset') totalModalAset_Active += amt;
                         else totalModalAset_Active -= amt;
                     }
 
-                    // 3. HITUNG DANA DARURAT
-                    if (tx.kategori.toLowerCase().includes('darurat')) lifetimeEmergency += amt;
+                    // 3. HITUNG DANA DARURAT (RESERVED FUND)
+                    if (tx.kategori.toLowerCase().includes('darurat')) {
+                        lifetimeEmergency += amt;
+                    }
 
-                    // 4. HITUNG CASHFLOW BULANAN (FIXED LOGIC)
+                    // 4. HITUNG CASHFLOW BULANAN (FIXED: Jual Aset = Positif)
                     if (txMonth === currentMonth && txYear === currentYear) {
                         if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') {
-                            monthlyInflow += amt;
+                            cashflowMonth += amt;
                         } else {
-                            monthlyOutflow += amt;
+                            cashflowMonth -= amt;
                         }
                     }
                 });
@@ -241,21 +237,21 @@
             const liquidCash = totalIn_Lifetime - totalOut_Lifetime;
             const toIDR = (n) => `Rp ${n.toLocaleString('id-ID')}`;
             
+            // TAMPILKAN CARD UTAMA
             document.getElementById('net-worth').innerText = toIDR(liquidCash + totalModalAset_Active);
             document.getElementById('liquid-cash').innerText = toIDR(liquidCash);
             document.getElementById('emergency-fund').innerText = toIDR(lifetimeEmergency);
 
             const cfElement = document.getElementById('cashflow');
-            const finalCashflow = monthlyInflow - monthlyOutflow;
-            cfElement.innerText = `${finalCashflow >= 0 ? '+' : ''} ${toIDR(finalCashflow)}`;
-            cfElement.className = `text-xl md:text-2xl font-black italic ${finalCashflow >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            cfElement.innerText = `${cashflowMonth >= 0 ? '+' : ''} ${toIDR(cashflowMonth)}`;
+            cfElement.className = `text-xl md:text-2xl font-black italic ${cashflowMonth >= 0 ? 'text-green-400' : 'text-red-400'}`;
 
             // RENDER ALOKASI PENGELUARAN (LIFETIME)
             const allocationList = document.getElementById('allocation-list');
             allocationList.innerHTML = '';
             Object.entries(expenseCategoriesLifetime)
                 .sort((a, b) => b[1] - a[1])
-                .slice(0, 5)
+                .slice(0, 6)
                 .forEach(([name, value]) => {
                     const percent = totalSpentLifetime > 0 ? ((value / totalSpentLifetime) * 100).toFixed(0) : 0;
                     allocationList.innerHTML += `
@@ -269,7 +265,6 @@
                         </div>`;
                 });
 
-            // Ganti Judul Grafik
             document.getElementById('chart-title').innerText = "Income Engine (Lifetime)";
             renderChart(incomeSourcesLifetime);
         }

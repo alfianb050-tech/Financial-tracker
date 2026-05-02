@@ -140,30 +140,28 @@
     </nav>
 
   <script>
-        // GATEKEEPER: Cek Login
         async function securityCheck() {
             try {
-                const user = await window.getCurrentUser(); //
+                const user = await window.getCurrentUser();
                 if (!user) {
-                    window.location.href = 'login.html'; //
+                    window.location.href = 'login.html';
                 } else {
-                    renderDashboard(); //
+                    renderDashboard();
                 }
             } catch (err) {
-                window.location.href = 'login.html'; //
+                window.location.href = 'login.html';
             }
         }
 
-        // Fungsi Logout
         async function handleLogout() {
             if (confirm("Terminate Session & Exit?")) {
-                await window.logoutUser(); //
-                window.location.href = 'login.html'; //
+                await window.logoutUser();
+                window.location.href = 'login.html';
             }
         }
 
         async function renderDashboard() {
-            const txs = await getTransactions(); //
+            const txs = await getTransactions();
             const now = new Date();
             const currentYear = now.getFullYear();
             const currentMonth = now.getMonth() + 1;
@@ -172,14 +170,14 @@
             document.getElementById('label-cashflow').innerText = `Cashflow (${monthNames[currentMonth-1]})`;
             document.getElementById('current-date-display').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // Variabel Lifetime (Saldo Riil)
+            // Variabel Saldo
             let totalIn_Lifetime = 0;
             let totalOut_Lifetime = 0;
             let totalModalAset_Active = 0;
-            let lifetimeEmergency = 0;
+            let totalReservedFund = 0; // Dana Darurat
             let cashflowMonth = 0;
 
-            // Variabel Grafik & Alokasi (Lifetime)
+            // Variabel Grafik & Alokasi
             let incomeSourcesLifetime = {};
             let expenseCategoriesLifetime = {};
             let totalSpentLifetime = 0;
@@ -187,7 +185,7 @@
             if (txs && txs.length > 0) {
                 txs.forEach(tx => {
                     const amt = parseFloat(tx.amount) || 0;
-                    const kat = (tx.kategori || 'Lain-lain').trim(); //
+                    const kat = (tx.kategori || '').trim();
                     const type = tx.type;
                     
                     const separator = tx.date.includes('/') ? '/' : '-';
@@ -199,58 +197,65 @@
                         txYear = parseInt(parts[2]); txMonth = parseInt(parts[1]); 
                     }
 
-                    // 1. LOGIC DASAR (INFLOW & OUTFLOW)
+                    // 1. HITUNG PEMASUKAN & JUAL ASET (DUIT MASUK)
                     if (type === 'pemasukan' || kat === 'Jual Aset') {
                         totalIn_Lifetime += amt;
                         if (type === 'pemasukan') {
                             incomeSourcesLifetime[kat] = (incomeSourcesLifetime[kat] || 0) + amt;
                         }
-                    } else if (type === 'pengeluaran' || kat === 'Beli Aset') {
+                        
+                        // Cashflow Bulanan (Jual Aset nambah cashflow)
+                        if (txMonth === currentMonth && txYear === currentYear) {
+                            cashflowMonth += amt;
+                        }
+                    } 
+                    // 2. HITUNG PENGELUARAN & BELI ASET (DUIT KELUAR)
+                    else {
                         totalOut_Lifetime += amt;
-                        // Masuk ke Alokasi Pengeluaran Lifetime
+                        
+                        // Masuk ke Alokasi Pengeluaran
                         expenseCategoriesLifetime[kat] = (expenseCategoriesLifetime[kat] || 0) + amt;
                         totalSpentLifetime += amt;
+
+                        // Cashflow Bulanan (Duit keluar)
+                        if (txMonth === currentMonth && txYear === currentYear) {
+                            cashflowMonth -= amt;
+                        }
                     }
 
-                    // 2. LOGIC RESERVED FUND (DANA DARURAT)
-                    // Menggunakan includes agar fleksibel (misal: "Dana Darurat" atau "Simpanan Darurat")
-                    if (kat.toLowerCase().includes('darurat')) {
-                        lifetimeEmergency += amt;
+                    // 3. LOGIKA KHUSUS DANA DARURAT (RESERVED FUND)
+                    // Kita cari kata "Reserved Fund" atau "Darurat"
+                    if (kat === 'Reserved Fund' || kat.toLowerCase().includes('darurat')) {
+                        totalReservedFund += amt;
                     }
 
-                    // 3. LOGIC MODAL ASET (BRANKAS)
+                    // 4. LOGIKA MODAL ASET (BRANKAS)
                     if (type === 'investasi') {
                         if (kat === 'Beli Aset') totalModalAset_Active += amt;
                         else if (kat === 'Jual Aset') totalModalAset_Active -= amt;
                     }
-
-                    // 4. LOGIC CASHFLOW BULANAN (FIXED)
-                    if (txMonth === currentMonth && txYear === currentYear) {
-                        if (type === 'pemasukan' || kat === 'Jual Aset') cashflowMonth += amt;
-                        else cashflowMonth -= amt;
-                    }
                 });
             }
 
-            // Liquid Cash = Uang yang beneran ada di dompet/rekening harian
+            // Liquid Cash = Saldo di dompet harian (Sudah dipotong beli aset & tabungan darurat)
             const liquidCash = totalIn_Lifetime - totalOut_Lifetime;
             const toIDR = (n) => `Rp ${n.toLocaleString('id-ID')}`;
             
-            // --- OUTPUT DISPLAY ---
-            
-            // NET WORTH = Uang Liquid + Modal di Aset + Uang di Dana Darurat
-            // (lifetimeEmergency ditambah lagi karena sebelumnya dianggap 'out' dari liquidCash)
-            const finalNetWorth = liquidCash + totalModalAset_Active + lifetimeEmergency;
+            // --- DISPLAY CARD ---
+
+            // RUMUS NET WORTH FINAL:
+            // Sisa Duit di Dompet + Modal yang ada di Aset + Tabungan di Reserved Fund
+            const finalNetWorth = liquidCash + totalModalAset_Active + totalReservedFund;
 
             document.getElementById('net-worth').innerText = toIDR(finalNetWorth);
             document.getElementById('liquid-cash').innerText = toIDR(liquidCash);
-            document.getElementById('emergency-fund').innerText = toIDR(lifetimeEmergency);
+            document.getElementById('emergency-fund').innerText = toIDR(totalReservedFund);
 
             const cfElement = document.getElementById('cashflow');
             cfElement.innerText = `${cashflowMonth >= 0 ? '+' : ''} ${toIDR(cashflowMonth)}`;
             cfElement.className = `text-xl md:text-2xl font-black italic ${cashflowMonth >= 0 ? 'text-green-400' : 'text-red-400'}`;
 
-            // RENDER ALOKASI PENGELUARAN (LIFETIME)
+            // RENDER ALOKASI & GRAFIK
             const allocationList = document.getElementById('allocation-list');
             allocationList.innerHTML = '';
             Object.entries(expenseCategoriesLifetime)
@@ -299,7 +304,7 @@
                             position: 'bottom',
                             labels: {
                                 color: '#64748b',
-                                font: { size: 10, weight: 'bold', family: 'sans-serif' },
+                                font: { size: 10, weight: 'bold' },
                                 padding: 20
                             }
                         }

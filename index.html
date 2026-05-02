@@ -139,7 +139,7 @@
         </ul>
     </nav>
 
-    <script>
+   <script>
         // GATEKEEPER: Cek Login
         async function securityCheck() {
             try {
@@ -172,45 +172,67 @@
             document.getElementById('label-cashflow').innerText = `Cashflow (${monthNames[currentMonth-1]})`;
             document.getElementById('current-date-display').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            let totalIn_Lifetime = 0, totalOut_Lifetime = 0, totalModalAset_Active = 0, lifetimeEmergency = 0, cashflowMonth = 0;
-            let categoriesYear = {}; 
-            const monthlyNetData = new Array(12).fill(0);
+            // Variabel Lifetime (Sepanjang Masa)
+            let totalIn_Lifetime = 0;
+            let totalOut_Lifetime = 0;
+            let totalModalAset_Active = 0;
+            let lifetimeEmergency = 0;
+            
+            // Variabel Cashflow (Bulan Berjalan)
+            let monthlyInflow = 0;
+            let monthlyOutflow = 0;
+
+            // Variabel Grafik & Alokasi (Lifetime)
+            let incomeSourcesLifetime = {};
+            let expenseCategoriesLifetime = {};
+            let totalSpentLifetime = 0;
 
             if (txs && txs.length > 0) {
                 txs.forEach(tx => {
                     const amt = parseFloat(tx.amount) || 0;
-                    // Deteksi separator tanggal biar fleksibel / atau -
                     const separator = tx.date.includes('/') ? '/' : '-';
                     const parts = tx.date.split(separator);
                     
-                    // Standarisasi urutan parts (YYYY-MM-DD vs DD/MM/YYYY)
                     let txYear, txMonth;
                     if (parts[0].length === 4) { // YYYY-MM-DD
-                        txYear = parseInt(parts[0]);
-                        txMonth = parseInt(parts[1]);
+                        txYear = parseInt(parts[0]); txMonth = parseInt(parts[1]);
                     } else { // DD/MM/YYYY
-                        txYear = parseInt(parts[2]);
-                        txMonth = parseInt(parts[1]);
+                        txYear = parseInt(parts[2]); txMonth = parseInt(parts[1]);
                     }
 
-                    if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') totalIn_Lifetime += amt;
-                    else totalOut_Lifetime += amt;
+                    // 1. HITUNG SALDO GLOBAL (LIFETIME)
+                    if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') {
+                        totalIn_Lifetime += amt;
+                        // Data untuk Grafik Doughnut (Hanya Pemasukan Murni)
+                        if (tx.type === 'pemasukan') {
+                            const kat = tx.kategori || 'Lain-lain';
+                            incomeSourcesLifetime[kat] = (incomeSourcesLifetime[kat] || 0) + amt;
+                        }
+                    } else {
+                        totalOut_Lifetime += amt;
+                        // Data untuk Alokasi Pengeluaran (Hanya Pengeluaran Murni)
+                        if (tx.type === 'pengeluaran') {
+                            const kat = tx.kategori || 'Lain-lain';
+                            expenseCategoriesLifetime[kat] = (expenseCategoriesLifetime[kat] || 0) + amt;
+                            totalSpentLifetime += amt;
+                        }
+                    }
 
+                    // 2. HITUNG MODAL ASET AKTIF
                     if (tx.type === 'investasi') {
                         if (tx.kategori === 'Beli Aset') totalModalAset_Active += amt;
                         else totalModalAset_Active -= amt;
                     }
 
+                    // 3. HITUNG DANA DARURAT
                     if (tx.kategori.toLowerCase().includes('darurat')) lifetimeEmergency += amt;
 
+                    // 4. HITUNG CASHFLOW BULANAN (FIXED LOGIC)
                     if (txMonth === currentMonth && txYear === currentYear) {
-                        cashflowMonth += (tx.type === 'pemasukan') ? amt : -amt;
-                    }
-
-                    if (txYear === currentYear) {
-                        monthlyNetData[txMonth - 1] += (tx.type === 'pemasukan') ? amt : -amt;
-                        if (tx.type !== 'pemasukan') {
-                            categoriesYear[tx.kategori] = (categoriesYear[tx.kategori] || 0) + amt;
+                        if (tx.type === 'pemasukan' || tx.kategori === 'Jual Aset') {
+                            monthlyInflow += amt;
+                        } else {
+                            monthlyOutflow += amt;
                         }
                     }
                 });
@@ -224,52 +246,64 @@
             document.getElementById('emergency-fund').innerText = toIDR(lifetimeEmergency);
 
             const cfElement = document.getElementById('cashflow');
-            cfElement.innerText = `${cashflowMonth >= 0 ? '+' : ''} ${toIDR(cashflowMonth)}`;
-            cfElement.className = `text-xl md:text-2xl font-black italic ${cashflowMonth >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            const finalCashflow = monthlyInflow - monthlyOutflow;
+            cfElement.innerText = `${finalCashflow >= 0 ? '+' : ''} ${toIDR(finalCashflow)}`;
+            cfElement.className = `text-xl md:text-2xl font-black italic ${finalCashflow >= 0 ? 'text-green-400' : 'text-red-400'}`;
 
+            // RENDER ALOKASI PENGELUARAN (LIFETIME)
             const allocationList = document.getElementById('allocation-list');
             allocationList.innerHTML = '';
-            const totalSpentYear = Object.values(categoriesYear).reduce((a, b) => a + b, 0);
-            Object.entries(categoriesYear).sort((a, b) => b[1] - a[1]).slice(0, 5).forEach(([name, value]) => {
-                const percent = totalSpentYear > 0 ? ((value / totalSpentYear) * 100).toFixed(0) : 0;
-                allocationList.innerHTML += `
-                    <div>
-                        <div class="flex justify-between text-[9px] mb-2 uppercase font-black tracking-tighter text-slate-400 italic">
-                            <span>${name}</span><span>${percent}%</span>
-                        </div>
-                        <div class="w-full bg-slate-950 h-1 rounded-full overflow-hidden">
-                            <div class="bg-blue-500 h-full" style="width: ${percent}%"></div>
-                        </div>
-                    </div>`;
-            });
+            Object.entries(expenseCategoriesLifetime)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .forEach(([name, value]) => {
+                    const percent = totalSpentLifetime > 0 ? ((value / totalSpentLifetime) * 100).toFixed(0) : 0;
+                    allocationList.innerHTML += `
+                        <div>
+                            <div class="flex justify-between text-[9px] mb-2 uppercase font-black tracking-tighter text-slate-400 italic">
+                                <span>${name}</span><span>${percent}%</span>
+                            </div>
+                            <div class="w-full bg-slate-950 h-1 rounded-full overflow-hidden">
+                                <div class="bg-blue-500 h-full" style="width: ${percent}%"></div>
+                            </div>
+                        </div>`;
+                });
 
-            renderChart(monthlyNetData);
+            // Ganti Judul Grafik
+            document.getElementById('chart-title').innerText = "Income Engine (Lifetime)";
+            renderChart(incomeSourcesLifetime);
         }
 
-        function renderChart(dataPoints) {
+        function renderChart(incomeData) {
             const ctx = document.getElementById('dashboardChart').getContext('2d');
+            const labels = Object.keys(incomeData);
+            const values = Object.values(incomeData);
+
             if (window.myChart) window.myChart.destroy();
             window.myChart = new Chart(ctx, {
-                type: 'line',
+                type: 'doughnut',
                 data: {
-                    labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
+                    labels: labels.length ? labels : ['No Data'],
                     datasets: [{
-                        data: dataPoints,
-                        borderColor: '#3b82f6',
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        fill: true,
-                        tension: 0.4
+                        data: values.length ? values : [1],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'],
+                        borderWidth: 0,
+                        hoverOffset: 20
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#475569', font: { size: 9, family: 'sans-serif', weight: 'bold' } } },
-                        x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 9, family: 'sans-serif', weight: 'bold' } } }
+                    cutout: '75%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#64748b',
+                                font: { size: 10, weight: 'bold', family: 'sans-serif' },
+                                padding: 20
+                            }
+                        }
                     }
                 }
             });

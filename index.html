@@ -139,7 +139,8 @@
         </ul>
     </nav>
 
-  <script>
+ <script>
+        // GATEKEEPER: Cek Login
         async function securityCheck() {
             try {
                 const user = await window.getCurrentUser();
@@ -153,6 +154,7 @@
             }
         }
 
+        // Fungsi Logout
         async function handleLogout() {
             if (confirm("Terminate Session & Exit?")) {
                 await window.logoutUser();
@@ -161,7 +163,7 @@
         }
 
         async function renderDashboard() {
-            const txs = await getTransactions();
+            const txs = await getTransactions(); 
             const now = new Date();
             const currentYear = now.getFullYear();
             const currentMonth = now.getMonth() + 1;
@@ -170,14 +172,16 @@
             document.getElementById('label-cashflow').innerText = `Cashflow (${monthNames[currentMonth-1]})`;
             document.getElementById('current-date-display').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // Variabel Saldo
-            let totalIn_Lifetime = 0;
-            let totalOut_Lifetime = 0;
-            let totalModalAset_Active = 0;
-            let totalReservedFund = 0; // Dana Darurat
-            let cashflowMonth = 0;
+            // Variabel Lifetime (Kekayaan Riil Sepanjang Masa)
+            let totalIn_Lifetime = 0;   // Semua uang masuk (Gaji + Hasil Jual Aset)
+            let totalOut_Lifetime = 0;  // Semua uang keluar (Belanja + Beli Aset)
+            let currentModalAset = 0;   // Modal yang masih "nyangkut" di aset (Brankas)
+            let totalReserved = 0;      // Saldo di Reserved Fund (Dana Darurat)
+            
+            // Variabel Performa Bulanan
+            let monthlyCashflow = 0;
 
-            // Variabel Grafik & Alokasi
+            // Variabel Grafik & Alokasi (Lifetime)
             let incomeSourcesLifetime = {};
             let expenseCategoriesLifetime = {};
             let totalSpentLifetime = 0;
@@ -197,65 +201,67 @@
                         txYear = parseInt(parts[2]); txMonth = parseInt(parts[1]); 
                     }
 
-                    // 1. HITUNG PEMASUKAN & JUAL ASET (DUIT MASUK)
+                    // 1. HITUNG SEMUA DUIT MASUK & KELUAR (LIFETIME)
+                    // PENTING: Jual Aset masuk ke Inflow agar untung/rugi trading terhitung di Net Worth
                     if (type === 'pemasukan' || kat === 'Jual Aset') {
                         totalIn_Lifetime += amt;
                         if (type === 'pemasukan') {
                             incomeSourcesLifetime[kat] = (incomeSourcesLifetime[kat] || 0) + amt;
                         }
-                        
-                        // Cashflow Bulanan (Jual Aset nambah cashflow)
-                        if (txMonth === currentMonth && txYear === currentYear) {
-                            cashflowMonth += amt;
-                        }
-                    } 
-                    // 2. HITUNG PENGELUARAN & BELI ASET (DUIT KELUAR)
-                    else {
+                    } else {
                         totalOut_Lifetime += amt;
-                        
-                        // Masuk ke Alokasi Pengeluaran
+                        // Masuk ke Alokasi Pengeluaran Lifetime
                         expenseCategoriesLifetime[kat] = (expenseCategoriesLifetime[kat] || 0) + amt;
                         totalSpentLifetime += amt;
+                    }
 
-                        // Cashflow Bulanan (Duit keluar)
-                        if (txMonth === currentMonth && txYear === currentYear) {
-                            cashflowMonth -= amt;
+                    // 2. LOGIKA MODAL ASET (BRANKAS)
+                    // Ini kunci agar Net Worth nambah pas untung & kurang pas rugi
+                    if (type === 'investasi') {
+                        if (kat === 'Beli Aset') {
+                            currentModalAset += amt;
+                        } else if (kat === 'Jual Aset') {
+                            // Kurangi modal sesuai harga beli (bisa pake note/keterangan jika ada)
+                            // Jika tidak ada note, kita asumsikan yang keluar adalah modalnya
+                            const modalKeluar = parseFloat(tx.note) || amt; 
+                            currentModalAset -= modalKeluar;
                         }
                     }
 
-                    // 3. LOGIKA KHUSUS DANA DARURAT (RESERVED FUND)
-                    // Kita cari kata "Reserved Fund" atau "Darurat"
+                    // 3. LOGIKA RESERVED FUND (DANA DARURAT)
                     if (kat === 'Reserved Fund' || kat.toLowerCase().includes('darurat')) {
-                        totalReservedFund += amt;
+                        totalReserved += amt;
                     }
 
-                    // 4. LOGIKA MODAL ASET (BRANKAS)
-                    if (type === 'investasi') {
-                        if (kat === 'Beli Aset') totalModalAset_Active += amt;
-                        else if (kat === 'Jual Aset') totalModalAset_Active -= amt;
+                    // 4. LOGIKA CASHFLOW BULANAN (SINKRON)
+                    if (txMonth === currentMonth && txYear === currentYear) {
+                        if (type === 'pemasukan' || kat === 'Jual Aset') {
+                            monthlyCashflow += amt;
+                        } else {
+                            monthlyCashflow -= amt;
+                        }
                     }
                 });
             }
 
-            // Liquid Cash = Saldo di dompet harian (Sudah dipotong beli aset & tabungan darurat)
             const liquidCash = totalIn_Lifetime - totalOut_Lifetime;
             const toIDR = (n) => `Rp ${n.toLocaleString('id-ID')}`;
             
-            // --- DISPLAY CARD ---
+            // --- DISPLAY DASHBOARD ---
 
-            // RUMUS NET WORTH FINAL:
-            // Sisa Duit di Dompet + Modal yang ada di Aset + Tabungan di Reserved Fund
-            const finalNetWorth = liquidCash + totalModalAset_Active + totalReservedFund;
+            // RUMUS NET WORTH: Duit Liquid + Modal Aset + Dana Darurat
+            // totalReserved ditambah lagi karena sebelumnya dianggap 'keluar' dari liquidCash
+            const finalNetWorth = liquidCash + currentModalAset + totalReserved;
 
             document.getElementById('net-worth').innerText = toIDR(finalNetWorth);
             document.getElementById('liquid-cash').innerText = toIDR(liquidCash);
-            document.getElementById('emergency-fund').innerText = toIDR(totalReservedFund);
+            document.getElementById('emergency-fund').innerText = toIDR(totalReserved);
 
             const cfElement = document.getElementById('cashflow');
-            cfElement.innerText = `${cashflowMonth >= 0 ? '+' : ''} ${toIDR(cashflowMonth)}`;
-            cfElement.className = `text-xl md:text-2xl font-black italic ${cashflowMonth >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            cfElement.innerText = `${monthlyCashflow >= 0 ? '+' : ''} ${toIDR(monthlyCashflow)}`;
+            cfElement.className = `text-xl md:text-2xl font-black italic ${monthlyCashflow >= 0 ? 'text-green-400' : 'text-red-400'}`;
 
-            // RENDER ALOKASI & GRAFIK
+            // RENDER ALOKASI PENGELUARAN (LIFETIME)
             const allocationList = document.getElementById('allocation-list');
             allocationList.innerHTML = '';
             Object.entries(expenseCategoriesLifetime)
